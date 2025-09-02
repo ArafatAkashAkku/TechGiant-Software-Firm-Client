@@ -3,6 +3,7 @@ import Layout from './components/Layout.component';
 import HomePage from './pages/Home.page';
 import PortfolioPage from './pages/Portfolio.page';
 import PortfolioDetailPage from './pages/PortfolioDetail.page';
+import CareerPage from './pages/Career.page';
 import { ThemeProvider } from './context/Theme.context';
 
 const App = () => {
@@ -14,6 +15,7 @@ const App = () => {
             <Route index element={<HomePage />} />
             <Route path="portfolio" element={<PortfolioPage />} />
             <Route path="portfolio/:username" element={<PortfolioDetailPage />} />
+            <Route path="careers" element={<CareerPage />} />
           </Route>
         </Routes>
       </Router>

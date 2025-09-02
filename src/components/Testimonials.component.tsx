@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
 
 interface Testimonial {
   id: number;
@@ -13,63 +14,92 @@ interface Testimonial {
 const Testimonials: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const testimonials: Testimonial[] = [
+  // Default testimonials data - can be replaced with API call
+  const defaultTestimonials: Testimonial[] = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      position: "CTO",
-      company: "InnovateTech Solutions",
-      content: "TechGiant transformed our entire digital infrastructure. Their expertise in cloud migration and system optimization resulted in 40% improved performance and significant cost savings. The team's professionalism and technical depth are unmatched.",
+      name: 'Sarah Johnson',
+      position: 'CTO',
+      company: 'InnovateTech Solutions',
+      content:
+        "TechGiant transformed our entire digital infrastructure. Their expertise in cloud migration and system optimization resulted in 40% improved performance and significant cost savings. The team's professionalism and technical depth are unmatched.",
       rating: 5,
-      avatar: "SJ"
+      avatar: 'SJ',
     },
     {
       id: 2,
-      name: "Michael Chen",
-      position: "CEO",
-      company: "DataFlow Analytics",
-      content: "Working with TechGiant was a game-changer for our startup. They delivered a scalable platform that handles millions of data points seamlessly. Their agile approach and attention to detail exceeded our expectations.",
+      name: 'Michael Chen',
+      position: 'CEO',
+      company: 'DataFlow Analytics',
+      content:
+        'Working with TechGiant was a game-changer for our startup. They delivered a scalable platform that handles millions of data points seamlessly. Their agile approach and attention to detail exceeded our expectations.',
       rating: 5,
-      avatar: "MC"
+      avatar: 'MC',
     },
     {
       id: 3,
-      name: "Emily Rodriguez",
-      position: "Product Manager",
-      company: "FinanceForward",
-      content: "The mobile application TechGiant developed for us has revolutionized how our customers interact with our services. User engagement increased by 65% within the first quarter. Outstanding work!",
+      name: 'Emily Rodriguez',
+      position: 'Product Manager',
+      company: 'FinanceForward',
+      content:
+        'The mobile application TechGiant developed for us has revolutionized how our customers interact with our services. User engagement increased by 65% within the first quarter. Outstanding work!',
       rating: 5,
-      avatar: "ER"
+      avatar: 'ER',
     },
     {
       id: 4,
-      name: "David Thompson",
-      position: "Operations Director",
-      company: "LogiChain Corp",
-      content: "TechGiant's AI-powered logistics solution streamlined our entire supply chain. We've seen 30% reduction in operational costs and improved delivery times. Their innovative approach is truly impressive.",
+      name: 'David Thompson',
+      position: 'Operations Director',
+      company: 'LogiChain Corp',
+      content:
+        "TechGiant's AI-powered logistics solution streamlined our entire supply chain. We've seen 30% reduction in operational costs and improved delivery times. Their innovative approach is truly impressive.",
       rating: 5,
-      avatar: "DT"
+      avatar: 'DT',
     },
     {
       id: 5,
-      name: "Lisa Wang",
-      position: "Marketing Director",
-      company: "BrandBoost Digital",
-      content: "The e-commerce platform TechGiant built for us is phenomenal. Sales increased by 150% in just six months. Their understanding of user experience and conversion optimization is exceptional.",
+      name: 'Lisa Wang',
+      position: 'Marketing Director',
+      company: 'BrandBoost Digital',
+      content:
+        'The e-commerce platform TechGiant built for us is phenomenal. Sales increased by 150% in just six months. Their understanding of user experience and conversion optimization is exceptional.',
       rating: 5,
-      avatar: "LW"
-    }
+      avatar: 'LW',
+    },
   ];
+
+  // Fetch testimonials data - replace URL with your API endpoint
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true);
+        // Replace this URL with your actual API endpoint
+        // const response = await axios.get('/api/testimonials');
+        // setTestimonials(response.data);
+
+        // For now, using default testimonials
+        setTestimonials(defaultTestimonials);
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        // Fallback to default testimonials on error
+        setTestimonials(defaultTestimonials);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
 
   // Auto-play functionality
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex(prevIndex => (prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1));
     }, 5000); // Change slide every 5 seconds
 
     return () => clearInterval(interval);
@@ -107,6 +137,24 @@ const Testimonials: React.FC = () => {
     ));
   };
 
+  // Show loading state while fetching testimonials
+  if (loading) {
+    return (
+      <section className="py-20 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-600 dark:text-gray-400 text-xl">Loading testimonials...</div>
+      </section>
+    );
+  }
+
+  // Don't render if no testimonials available
+  if (testimonials.length === 0) {
+    return (
+      <section className="py-20 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-gray-600 dark:text-gray-400 text-xl">No testimonials available</div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-6 lg:px-8">
@@ -116,7 +164,7 @@ const Testimonials: React.FC = () => {
             What Our <span className="text-blue-600 dark:text-blue-400">Clients Say</span>
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Don't just take our word for it. Here's what industry leaders and innovative companies 
+            Don't just take our word for it. Here's what industry leaders and innovative companies
             have to say about their experience working with TechGiant.
           </p>
         </div>
@@ -168,7 +216,12 @@ const Testimonials: React.FC = () => {
             aria-label="Previous testimonial"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -208,14 +261,22 @@ const Testimonials: React.FC = () => {
             {isAutoPlaying ? (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <span>Pause Auto-play</span>
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <span>Resume Auto-play</span>
               </>
@@ -226,19 +287,27 @@ const Testimonials: React.FC = () => {
         {/* Statistics */}
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
-            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">500+</div>
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              500+
+            </div>
             <div className="text-gray-600 dark:text-gray-400">Happy Clients</div>
           </div>
           <div>
-            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">98%</div>
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              98%
+            </div>
             <div className="text-gray-600 dark:text-gray-400">Satisfaction Rate</div>
           </div>
           <div>
-            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">1000+</div>
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              1000+
+            </div>
             <div className="text-gray-600 dark:text-gray-400">Projects Delivered</div>
           </div>
           <div>
-            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">24/7</div>
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              24/7
+            </div>
             <div className="text-gray-600 dark:text-gray-400">Support Available</div>
           </div>
         </div>

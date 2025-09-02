@@ -7,6 +7,8 @@ const Header = () => {
     <header className="flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-800 dark:text-white">
       <nav className="flex gap-4">
         <Link to="/">Home</Link>
+        <Link to="/portfolio">Portfolio</Link>
+        <Link to="/careers">Careers</Link>
         <Link to="/login">Login</Link>
         <Link to="/dashboard">Dashboard</Link>
       </nav>
