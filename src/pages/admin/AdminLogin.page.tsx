@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/Auth.context';
+import { useAuth } from '../../context/admin/Auth.context';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const AdminLogin = () => {
@@ -17,6 +17,7 @@ const AdminLogin = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const from = (location.state as any)?.from?.pathname || '/admin';
       navigate(from, { replace: true });
     }
@@ -41,6 +42,7 @@ const AdminLogin = () => {
       const success = await login(formData.username, formData.password);
 
       if (success) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const from = (location.state as any)?.from?.pathname || '/admin';
         navigate(from, { replace: true });
       } else {
@@ -48,6 +50,7 @@ const AdminLogin = () => {
       }
     } catch (err) {
       setError('An error occurred during login. Please try again.');
+      console.error('Login error:', err);
     } finally {
       setIsSubmitting(false);
     }

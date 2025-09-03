@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/Auth.context';
+import { useAuth } from '../../context/admin/Auth.context';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -50,7 +50,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You don't have permission to access this page. Required role: {requiredRole}
+            You dont have permission to access this page. Required role: {requiredRole}
           </p>
           <button
             onClick={() => window.history.back()}

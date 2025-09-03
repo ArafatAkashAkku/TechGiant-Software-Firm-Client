@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/Auth.context';
+import { useAuth } from '../../context/admin/Auth.context';
 import { useNavigate } from 'react-router-dom';
-import { useSiteSettings } from '../context/SiteSettings.context';
+import { useSiteSettings } from '../../context/SiteSettings.context';
 // import axios from 'axios';
 
 const AdminDashboard = () => {
@@ -52,6 +52,7 @@ const AdminDashboard = () => {
   // No need for local API functions or useEffect to load settings
 
   // Handle form input changes
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSettingChange = (field: any, value: any) => {
     updateSiteSettings({
       [field]: value,
@@ -151,20 +152,21 @@ const AdminDashboard = () => {
   }, []);
 
   // About Us form handlers
-  const handleStatisticChange = (index, field, value) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleStatisticChange = (index: number, field: string, value: any) => {
     const updatedStats = [...aboutUsData.statistics];
     updatedStats[index] = { ...updatedStats[index], [field]: value };
     setAboutUsData({ ...aboutUsData, statistics: updatedStats });
   };
-
-  const handleStoryChange = (field, value) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleStoryChange = (field: string, value: any) => {
     setAboutUsData({
       ...aboutUsData,
       storyContent: { ...aboutUsData.storyContent, [field]: value },
     });
   };
 
-  const handleStoryParagraphChange = (index, value) => {
+  const handleStoryParagraphChange = (index: number, value: string) => {
     const updatedParagraphs = [...aboutUsData.storyContent.paragraphs];
     updatedParagraphs[index] = value;
     setAboutUsData({
@@ -173,14 +175,14 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleMissionChange = (field, value) => {
+  const handleMissionChange = (field: string, value: string) => {
     setAboutUsData({
       ...aboutUsData,
       missionContent: { ...aboutUsData.missionContent, [field]: value },
     });
   };
 
-  const handleCompanyInfoChange = (field, value) => {
+  const handleCompanyInfoChange = (field: string, value: string) => {
     setAboutUsData({
       ...aboutUsData,
       companyInfo: { ...aboutUsData.companyInfo, [field]: value },
@@ -205,7 +207,7 @@ const AdminDashboard = () => {
               <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Site Settings</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Manage your website's basic information and SEO settings
+                  Manage your website basic information and SEO settings
                 </p>
               </div>
               <div className="p-6">
