@@ -4,22 +4,47 @@ import HomePage from './pages/Home.page';
 import PortfolioPage from './pages/Portfolio.page';
 import PortfolioDetailPage from './pages/PortfolioDetail.page';
 import CareerPage from './pages/Career.page';
+import BlogPage from './pages/Blog.page';
+import BlogDetailPage from './pages/BlogDetail.page';
+import AdminLogin from './pages/AdminLogin.page';
+import AdminDashboard from './pages/AdminDashboard.page';
+import ProtectedRoute from './components/ProtectedRoute.component';
 import { ThemeProvider } from './context/Theme.context';
+import { AuthProvider } from './context/Auth.context';
+import { SiteSettingsProvider } from './context/SiteSettings.context';
 
 const App = () => {
   return (
-    <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<HomePage />} />
-            <Route path="portfolio" element={<PortfolioPage />} />
-            <Route path="portfolio/:username" element={<PortfolioDetailPage />} />
-            <Route path="careers" element={<CareerPage />} />
-          </Route>
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <SiteSettingsProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Layout />}>
+                <Route index element={<HomePage />} />
+                <Route path="portfolio" element={<PortfolioPage />} />
+                <Route path="portfolio/:username" element={<PortfolioDetailPage />} />
+                <Route path="careers" element={<CareerPage />} />
+                <Route path="blog" element={<BlogPage />} />
+                <Route path="blog/:blogId" element={<BlogDetailPage />} />
+              </Route>
+
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </SiteSettingsProvider>
   );
 };
 

@@ -503,6 +503,75 @@ const Career: React.FC = () => {
     );
   }
 
+  // No jobs found state (when no jobs exist at all)
+  if (!loading && jobPositions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Hero Section */}
+        <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Join Our Team</h1>
+            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+              Build the future of technology with us. We're looking for passionate individuals who
+              want to make a difference.
+            </p>
+          </div>
+        </section>
+
+        {/* No Jobs Found */}
+        <section className="py-16 bg-white dark:bg-gray-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <svg
+                  className="mx-auto h-24 w-24 text-gray-400 dark:text-gray-600 mb-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z"
+                  />
+                </svg>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  No Job Openings Available
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  We don't have any open positions at the moment, but we're always looking for
+                  talented individuals. Check back soon or reach out to us directly!
+                </p>
+                <div className="space-y-4">
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="inline-flex items-center bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    <svg
+                      className="mr-2 w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    Refresh Page
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
@@ -695,10 +764,52 @@ const Career: React.FC = () => {
             ))}
           </div>
 
-          {filteredJobs.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 dark:text-gray-500 text-lg">
-                No positions found matching your criteria.
+          {filteredJobs.length === 0 && jobPositions.length > 0 && (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <svg
+                  className="mx-auto h-20 w-20 text-gray-400 dark:text-gray-600 mb-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  No Jobs Found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  No job positions match your current search criteria. Try adjusting your filters to
+                  see more opportunities.
+                </p>
+                <button
+                  onClick={() => {
+                    setFilterDepartment('All');
+                    setFilterLocation('All');
+                    setFilterType('All');
+                  }}
+                  className="inline-flex items-center bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <svg
+                    className="mr-2 w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Clear All Filters
+                </button>
               </div>
             </div>
           )}

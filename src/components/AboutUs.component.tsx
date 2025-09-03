@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 // import axios from 'axios';
 
 interface Statistic {
@@ -28,59 +28,11 @@ interface CompanyInfo {
 }
 
 const AboutUs: React.FC = () => {
-  const [counters, setCounters] = useState<number[]>([0, 0, 0, 0]);
-  const [hasAnimated, setHasAnimated] = useState(false);
   const [statistics, setStatistics] = useState<Statistic[]>([]);
   const [storyContent, setStoryContent] = useState<StoryContent | null>(null);
   const [missionContent, setMissionContent] = useState<MissionContent | null>(null);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const statsRef = useRef<HTMLDivElement>(null);
-
-  const animateCounter = (targetValue: number, index: number) => {
-    const duration = 2000; // 2 seconds
-    const steps = 60;
-    const increment = targetValue / steps;
-    let current = 0;
-    let step = 0;
-
-    const timer = setInterval(() => {
-      step++;
-      current = Math.min(increment * step, targetValue);
-
-      setCounters(prev => {
-        const newCounters = [...prev];
-        newCounters[index] = Math.floor(current);
-        return newCounters;
-      });
-
-      if (step >= steps) {
-        clearInterval(timer);
-      }
-    }, duration / steps);
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
-          // Start animations for each counter
-          animateCounter(500, 0);
-          animateCounter(50, 1);
-          animateCounter(10, 2);
-          animateCounter(24, 3); // For 24/7
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (statsRef.current) {
-      observer.observe(statsRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [hasAnimated]);
 
   // Default statistics data - can be replaced with API call
   const defaultStatistics: Statistic[] = [
@@ -225,14 +177,14 @@ const AboutUs: React.FC = () => {
       </section>
 
       {/* Statistics Section */}
-      <section className="py-16 bg-gray-900 dark:bg-gray-950" ref={statsRef}>
+      <section className="py-16 bg-gray-900 dark:bg-gray-950">
         <div className="container mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {statistics.map((stat, index) => (
+            {statistics.map(stat => (
               <div key={stat.id} className="text-center">
                 <div className="text-4xl mb-2">{stat.icon}</div>
                 <div className="text-3xl md:text-4xl font-bold text-white dark:text-gray-100 mb-2">
-                  {counters[index]}
+                  {stat.value}
                   {stat.suffix}
                 </div>
                 <div className="text-gray-300 dark:text-gray-400 font-medium">{stat.label}</div>

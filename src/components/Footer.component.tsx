@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
     { id: 2, name: 'Our Team', href: '#' },
     { id: 3, name: 'Careers', href: '/careers' },
     { id: 4, name: 'Case Studies', href: '#' },
-    { id: 5, name: 'Blog', href: '#' },
+    { id: 5, name: 'Blog', href: '/blog' },
     { id: 6, name: 'News & Events', href: '#' },
   ];
 
