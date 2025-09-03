@@ -79,14 +79,12 @@ const Blog: React.FC = () => {
         // setBlogs(response.data);
 
         // Simulate API call delay
-        setTimeout(() => {
-          setBlogs(defaultBlogs);
-          setLoading(false);
-        }, 500);
+        setBlogs(defaultBlogs);
       } catch (error) {
         console.error('Error fetching blogs:', error);
         // Fallback to default blogs on error
         setBlogs(defaultBlogs);
+      } finally {
         setLoading(false);
       }
     };
@@ -143,7 +141,7 @@ const Blog: React.FC = () => {
                 No Blog Posts Found
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-8">
-                We're working on creating amazing content for you. Check back soon for the latest
+                We are working on creating amazing content for you. Check back soon for the latest
                 insights and updates!
               </p>
               <div className="space-y-4">
