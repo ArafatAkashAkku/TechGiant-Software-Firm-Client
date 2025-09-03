@@ -3,11 +3,10 @@ import { useAuth } from '../../context/admin/Auth.context';
 import { useNavigate } from 'react-router-dom';
 import OverviewTab from '../../components/admin/OverviewTab.component';
 import TestimonialsTab from '../../components/admin/TestimonialsTab.component';
+import ClientTab from '../../components/admin/ClientTab.component';
 import HeroSliderTab from '../../components/admin/HeroSliderTab.component';
 import AboutUsTab from '../../components/admin/AboutUsTab.component';
-import UsersTab from '../../components/admin/UsersTab.component';
-import ContentTab from '../../components/admin/ContentTab.component';
-import SettingsTab from '../../components/admin/SettingsTab.component';
+
 // import axios from 'axios';
 
 const AdminDashboard = () => {
@@ -27,37 +26,25 @@ const AdminDashboard = () => {
   };
 
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: '📊' },
+    { id: 'heroslider', name: 'Hero Slider', icon: '🖼️' },
+    { id: 'aboutus', name: 'About Us', icon: 'ℹ️' },
     { id: 'testimonials', name: 'Testimonials', icon: '💬' },
-    { id: 'heroslider', name: 'Hero Slider', icon: '🎬' },
-    { id: 'aboutus', name: 'About Us', icon: '🏢' },
-    { id: 'users', name: 'Users', icon: '👥' },
-    { id: 'content', name: 'Content', icon: '📝' },
-    { id: 'settings', name: 'Settings', icon: '⚙️' },
+    { id: 'overview', name: 'Overview', icon: '📊' },
+    { id: 'client', name: 'Client', icon: '🏢' },
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
         return <OverviewTab />;
-
       case 'testimonials':
         return <TestimonialsTab />;
-
+      case 'client':
+        return <ClientTab />;
       case 'heroslider':
         return <HeroSliderTab />;
-
       case 'aboutus':
         return <AboutUsTab />;
-
-      case 'users':
-        return <UsersTab />;
-
-      case 'content':
-        return <ContentTab />;
-
-      case 'settings':
-        return <SettingsTab />;
 
       default:
         return null;

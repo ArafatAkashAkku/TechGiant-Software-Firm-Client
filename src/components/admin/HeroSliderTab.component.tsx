@@ -16,6 +16,7 @@ const HeroSliderTab: React.FC = () => {
   const [saveMessage, setSaveMessage] = useState('');
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [newSlide, setNewSlide] = useState<Omit<SlideData, 'id'>>({
     title: '',
     subtitle: '',
@@ -23,6 +24,40 @@ const HeroSliderTab: React.FC = () => {
     image: '',
     bulletPoints: ['', '', '', ''],
   });
+
+  // Mock data for now
+  const mockSlides: SlideData[] = [
+    {
+      id: 1,
+      title: 'Innovative Software Solutions',
+      subtitle: 'Transforming Ideas into Reality',
+      description:
+        'We deliver cutting-edge software solutions that drive business growth and digital transformation.',
+      image:
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234F46E5;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%237C3AED;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='600' fill='url(%23grad1)'/%3E%3Cg fill='white' opacity='0.1'%3E%3Ccircle cx='200' cy='150' r='80'/%3E%3Ccircle cx='400' cy='300' r='60'/%3E%3Ccircle cx='800' cy='200' r='100'/%3E%3Ccircle cx='1000' cy='400' r='70'/%3E%3C/g%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-size='48' font-weight='bold'%3EInnovative Solutions%3C/text%3E%3Ctext x='600' y='340' text-anchor='middle' fill='white' font-size='24' opacity='0.9'%3ESoftware Development Excellence%3C/text%3E%3C/svg%3E",
+      bulletPoints: [
+        'Custom Software Development',
+        'Cloud-Native Architecture',
+        'AI & Machine Learning Integration',
+        '24/7 Technical Support',
+      ],
+    },
+    {
+      id: 2,
+      title: 'Enterprise Solutions',
+      subtitle: 'Scalable & Secure',
+      description:
+        'Build robust enterprise applications with our proven methodologies and industry best practices.',
+      image:
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600'%3E%3Cdefs%3E%3ClinearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2306B6D4;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%230891B2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='600' fill='url(%23grad2)'/%3E%3Cg fill='white' opacity='0.15'%3E%3Crect x='100' y='100' width='200' height='150' rx='10'/%3E%3Crect x='350' y='200' width='180' height='120' rx='10'/%3E%3Crect x='600' y='150' width='220' height='180' rx='10'/%3E%3Crect x='900' y='180' width='160' height='140' rx='10'/%3E%3C/g%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-size='48' font-weight='bold'%3EEnterprise Ready%3C/text%3E%3Ctext x='600' y='340' text-anchor='middle' fill='white' font-size='24' opacity='0.9'%3EScalable Business Solutions%3C/text%3E%3C/svg%3E",
+      bulletPoints: [
+        'Microservices Architecture',
+        'Advanced Security Protocols',
+        'Performance Optimization',
+        'Seamless Integration',
+      ],
+    },
+  ];
 
   // Fetch hero slider data from API
   const fetchHeroSliderData = async () => {
@@ -32,39 +67,6 @@ const HeroSliderTab: React.FC = () => {
       // const response = await axios.get('/api/admin/hero-slider');
       // setSlides(response.data);
 
-      // Mock data for now
-      const mockSlides: SlideData[] = [
-        {
-          id: 1,
-          title: 'Innovative Software Solutions',
-          subtitle: 'Transforming Ideas into Reality',
-          description:
-            'We deliver cutting-edge software solutions that drive business growth and digital transformation.',
-          image:
-            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234F46E5;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%237C3AED;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='600' fill='url(%23grad1)'/%3E%3Cg fill='white' opacity='0.1'%3E%3Ccircle cx='200' cy='150' r='80'/%3E%3Ccircle cx='400' cy='300' r='60'/%3E%3Ccircle cx='800' cy='200' r='100'/%3E%3Ccircle cx='1000' cy='400' r='70'/%3E%3C/g%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-size='48' font-weight='bold'%3EInnovative Solutions%3C/text%3E%3Ctext x='600' y='340' text-anchor='middle' fill='white' font-size='24' opacity='0.9'%3ESoftware Development Excellence%3C/text%3E%3C/svg%3E",
-          bulletPoints: [
-            'Custom Software Development',
-            'Cloud-Native Architecture',
-            'AI & Machine Learning Integration',
-            '24/7 Technical Support',
-          ],
-        },
-        {
-          id: 2,
-          title: 'Enterprise Solutions',
-          subtitle: 'Scalable & Secure',
-          description:
-            'Build robust enterprise applications with our proven methodologies and industry best practices.',
-          image:
-            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600'%3E%3Cdefs%3E%3ClinearGradient id='grad2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2306B6D4;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%230891B2;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='600' fill='url(%23grad2)'/%3E%3Cg fill='white' opacity='0.15'%3E%3Crect x='100' y='100' width='200' height='150' rx='10'/%3E%3Crect x='350' y='200' width='180' height='120' rx='10'/%3E%3Crect x='600' y='150' width='220' height='180' rx='10'/%3E%3Crect x='900' y='180' width='160' height='140' rx='10'/%3E%3C/g%3E%3Ctext x='600' y='280' text-anchor='middle' fill='white' font-size='48' font-weight='bold'%3EEnterprise Ready%3C/text%3E%3Ctext x='600' y='340' text-anchor='middle' fill='white' font-size='24' opacity='0.9'%3EScalable Business Solutions%3C/text%3E%3C/svg%3E",
-          bulletPoints: [
-            'Microservices Architecture',
-            'Advanced Security Protocols',
-            'Performance Optimization',
-            'Seamless Integration',
-          ],
-        },
-      ];
       setSlides(mockSlides);
     } catch (error) {
       console.error('Error fetching hero slider data:', error);
@@ -73,19 +75,58 @@ const HeroSliderTab: React.FC = () => {
     }
   };
 
-  // Save hero slider data to API
-  const saveHeroSliderData = async () => {
+  // Add new slide to API
+  const addSlideToAPI = async (slideData: Omit<SlideData, 'id'>) => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // await axios.put('/api/admin/hero-slider', { slides });
+      // const response = await axios.post('/api/admin/hero-slider', slideData);
+      // return response.data;
 
-      setSaveMessage('Hero slider data saved successfully!');
+      // Mock response for now
+      const newId = Math.max(...slides.map(s => s.id), 0) + 1;
+      return { ...slideData, id: newId };
+    } catch (error) {
+      console.error('Error adding slide:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update existing slide in API
+  const updateSlideInAPI = async (slideId: number, slideData: SlideData) => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call
+      // await axios.put(`/api/admin/hero-slider/${slideId}`, slideData);
+
+      setSaveMessage('Slide updated successfully!');
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
-      console.error('Error saving hero slider data:', error);
-      setSaveMessage('Error saving hero slider data. Please try again.');
+      console.error('Error updating slide:', error);
+      setSaveMessage('Error updating slide. Please try again.');
       setTimeout(() => setSaveMessage(''), 3000);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete slide from API
+  const deleteSlideFromAPI = async (slideId: number) => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call
+      // await axios.delete(`/api/admin/hero-slider/${slideId}`);
+
+      setSaveMessage('Slide deleted successfully!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      console.error('Error deleting slide:', error);
+      setSaveMessage('Error deleting slide. Please try again.');
+      setTimeout(() => setSaveMessage(''), 3000);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -114,25 +155,54 @@ const HeroSliderTab: React.FC = () => {
     );
   };
 
-  const addNewSlide = () => {
-    const newId = Math.max(...slides.map(s => s.id), 0) + 1;
-    const slideToAdd: SlideData = {
-      ...newSlide,
-      id: newId,
-    };
-    setSlides(prev => [...prev, slideToAdd]);
-    setNewSlide({
-      title: '',
-      subtitle: '',
-      description: '',
-      image: '',
-      bulletPoints: ['', '', '', ''],
-    });
-    setShowAddModal(false);
+  const addNewSlide = async () => {
+    try {
+      const addedSlide = await addSlideToAPI(newSlide);
+      setSlides(prev => [...prev, addedSlide]);
+      setNewSlide({
+        title: '',
+        subtitle: '',
+        description: '',
+        image: '',
+        bulletPoints: ['', '', '', ''],
+      });
+      setShowAddModal(false);
+      setSaveMessage('New slide added successfully!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      setSaveMessage('Error adding new slide. Please try again.');
+      setTimeout(() => setSaveMessage(''), 3000);
+    }
   };
 
-  const deleteSlide = (slideId: number) => {
-    setSlides(prev => prev.filter(slide => slide.id !== slideId));
+  const confirmDelete = (slideId: number) => {
+    setShowDeleteConfirm(slideId);
+  };
+
+  const deleteSlide = async (slideId: number) => {
+    try {
+      await deleteSlideFromAPI(slideId);
+      setSlides(prev => prev.filter(slide => slide.id !== slideId));
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      // Error message is handled in deleteSlideFromAPI
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(null);
+  };
+
+  const updateSlide = async (slideId: number) => {
+    try {
+      const slideToUpdate = slides.find(slide => slide.id === slideId);
+      if (slideToUpdate) {
+        await updateSlideInAPI(slideId, slideToUpdate);
+        setIsEditing(null);
+      }
+    } catch (error) {
+      // Error message is handled in updateSlideInAPI
+    }
   };
 
   if (loading) {
@@ -178,14 +248,31 @@ const HeroSliderTab: React.FC = () => {
                     Slide {slide.id}
                   </h3>
                   <div className="flex space-x-2">
+                    {isEditing === slide.id ? (
+                      <>
+                        <button
+                          onClick={() => updateSlide(slide.id)}
+                          className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm font-medium mr-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setIsEditing(null)}
+                          className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setIsEditing(slide.id)}
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                      >
+                        Edit
+                      </button>
+                    )}
                     <button
-                      onClick={() => setIsEditing(isEditing === slide.id ? null : slide.id)}
-                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
-                    >
-                      {isEditing === slide.id ? 'Cancel' : 'Edit'}
-                    </button>
-                    <button
-                      onClick={() => deleteSlide(slide.id)}
+                      onClick={() => confirmDelete(slide.id)}
                       className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
                     >
                       Delete
@@ -296,16 +383,6 @@ const HeroSliderTab: React.FC = () => {
                 )}
               </div>
             ))}
-          </div>
-
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={saveHeroSliderData}
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200"
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
           </div>
 
           {saveMessage && (
@@ -424,6 +501,34 @@ const HeroSliderTab: React.FC = () => {
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
               >
                 Add Slide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Are you sure you want to delete this slide? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteSlide(showDeleteConfirm)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
+              >
+                Delete
               </button>
             </div>
           </div>

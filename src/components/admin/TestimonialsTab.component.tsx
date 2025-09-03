@@ -16,6 +16,7 @@ const TestimonialsTab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [newTestimonial, setNewTestimonial] = useState<Omit<Testimonial, 'id'>>({
     name: '',
     position: '',
@@ -67,17 +68,53 @@ const TestimonialsTab: React.FC = () => {
     }
   };
 
-  // Save testimonials data
-  const saveTestimonialsData = async (updatedTestimonials: Testimonial[]) => {
+  // Add testimonial to API
+  const addTestimonialToAPI = async (testimonial: Testimonial) => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // await axios.put('/api/testimonials', { testimonials: updatedTestimonials });
+      // const response = await axios.post('/api/testimonials', testimonial);
+      // return response.data;
 
-      console.log('Testimonials data saved:', updatedTestimonials);
-      setTestimonials(updatedTestimonials);
+      console.log('Testimonial added:', testimonial);
+      return testimonial;
     } catch (error) {
-      console.error('Error saving testimonials:', error);
+      console.error('Error adding testimonial:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update testimonial in API
+  const updateTestimonialInAPI = async (testimonial: Testimonial) => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call
+      // const response = await axios.put(`/api/testimonials/${testimonial.id}`, testimonial);
+      // return response.data;
+
+      console.log('Testimonial updated:', testimonial);
+      return testimonial;
+    } catch (error) {
+      console.error('Error updating testimonial:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete testimonial from API
+  const deleteTestimonialFromAPI = async (id: number) => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call
+      // await axios.delete(`/api/testimonials/${id}`);
+
+      console.log('Testimonial deleted:', id);
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -93,19 +130,36 @@ const TestimonialsTab: React.FC = () => {
 
   const handleSave = async () => {
     if (editingTestimonial) {
-      const updatedTestimonials = testimonials.map(t =>
-        t.id === editingTestimonial.id ? editingTestimonial : t
-      );
-      await saveTestimonialsData(updatedTestimonials);
-      setEditingTestimonial(null);
+      try {
+        await updateTestimonialInAPI(editingTestimonial);
+        const updatedTestimonials = testimonials.map(t =>
+          t.id === editingTestimonial.id ? editingTestimonial : t
+        );
+        setTestimonials(updatedTestimonials);
+        setEditingTestimonial(null);
+      } catch (error) {
+        console.error('Failed to update testimonial:', error);
+      }
     }
   };
 
+  const confirmDelete = (id: number) => {
+    setShowDeleteConfirm(id);
+  };
+
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this testimonial?')) {
+    try {
+      await deleteTestimonialFromAPI(id);
       const updatedTestimonials = testimonials.filter(t => t.id !== id);
-      await saveTestimonialsData(updatedTestimonials);
+      setTestimonials(updatedTestimonials);
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Failed to delete testimonial:', error);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(null);
   };
 
   const handleAddNew = async () => {
@@ -115,18 +169,23 @@ const TestimonialsTab: React.FC = () => {
       id: newId,
     };
 
-    const updatedTestimonials = [...testimonials, testimonialToAdd];
-    await saveTestimonialsData(updatedTestimonials);
+    try {
+      await addTestimonialToAPI(testimonialToAdd);
+      const updatedTestimonials = [...testimonials, testimonialToAdd];
+      setTestimonials(updatedTestimonials);
 
-    setNewTestimonial({
-      name: '',
-      position: '',
-      company: '',
-      content: '',
-      rating: 5,
-      avatar: '',
-    });
-    setShowAddModal(false);
+      setNewTestimonial({
+        name: '',
+        position: '',
+        company: '',
+        content: '',
+        rating: 5,
+        avatar: '',
+      });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Failed to add testimonial:', error);
+    }
   };
 
   const renderStars = (rating: number, onChange?: (rating: number) => void) => {
@@ -292,7 +351,7 @@ const TestimonialsTab: React.FC = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(testimonial.id)}
+                      onClick={() => confirmDelete(testimonial.id)}
                       className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                     >
                       Delete
@@ -399,6 +458,34 @@ const TestimonialsTab: React.FC = () => {
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors duration-200"
               >
                 Add Testimonial
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Are you sure you want to delete this testimonial? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(showDeleteConfirm)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
+              >
+                Delete
               </button>
             </div>
           </div>

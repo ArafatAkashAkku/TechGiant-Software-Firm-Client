@@ -33,36 +33,44 @@ interface AboutUsData {
   companyInfo: CompanyInfo;
 }
 
+// Mock data for initial display
+const mockAboutUsData: AboutUsData = {
+  statistics: [
+    { id: 1, value: 500, label: 'Projects Completed', icon: '📊', suffix: '+' },
+    { id: 2, value: 50, label: 'Happy Clients', icon: '😊', suffix: '+' },
+    { id: 3, value: 10, label: 'Years Experience', icon: '🏆', suffix: '+' },
+    { id: 4, value: 24, label: 'Support Available', icon: '🛠️', suffix: '/7' },
+  ],
+  storyContent: {
+    id: 1,
+    title: 'Our Story',
+    paragraphs: [
+      'Founded in 2014, TechGiant began as a small team of passionate developers with a vision to bridge the gap between complex technology and business needs. What started as a startup has grown into a trusted partner for companies worldwide.',
+      "Over the years, we've evolved from a local development shop to a full-service technology consultancy, helping businesses of all sizes navigate their digital transformation journey with confidence and success.",
+      'Today, we continue to push boundaries, embrace emerging technologies, and deliver solutions that not only meet current needs but anticipate future challenges.',
+    ],
+  },
+  missionContent: {
+    id: 1,
+    mission:
+      'To empower businesses with innovative software solutions that drive growth, efficiency, and competitive advantage in the digital age.',
+    vision:
+      "To be the leading technology partner that transforms ideas into reality and helps businesses thrive in tomorrow's digital landscape.",
+  },
+  companyInfo: {
+    id: 1,
+    name: 'TechGiant',
+    description:
+      'We are a forward-thinking software development company dedicated to transforming businesses through innovative technology solutions.',
+  },
+};
+
 const AboutUsTab: React.FC = () => {
   const [aboutUsData, setAboutUsData] = useState<AboutUsData>({
-    statistics: [
-      { id: 1, value: 500, label: 'Projects Completed', icon: '📊', suffix: '+' },
-      { id: 2, value: 50, label: 'Happy Clients', icon: '😊', suffix: '+' },
-      { id: 3, value: 10, label: 'Years Experience', icon: '🏆', suffix: '+' },
-      { id: 4, value: 24, label: 'Support Available', icon: '🛠️', suffix: '/7' },
-    ],
-    storyContent: {
-      id: 1,
-      title: 'Our Story',
-      paragraphs: [
-        'Founded in 2014, TechGiant began as a small team of passionate developers with a vision to bridge the gap between complex technology and business needs. What started as a startup has grown into a trusted partner for companies worldwide.',
-        "Over the years, we've evolved from a local development shop to a full-service technology consultancy, helping businesses of all sizes navigate their digital transformation journey with confidence and success.",
-        'Today, we continue to push boundaries, embrace emerging technologies, and deliver solutions that not only meet current needs but anticipate future challenges.',
-      ],
-    },
-    missionContent: {
-      id: 1,
-      mission:
-        'To empower businesses with innovative software solutions that drive growth, efficiency, and competitive advantage in the digital age.',
-      vision:
-        "To be the leading technology partner that transforms ideas into reality and helps businesses thrive in tomorrow's digital landscape.",
-    },
-    companyInfo: {
-      id: 1,
-      name: 'TechGiant',
-      description:
-        'We are a forward-thinking software development company dedicated to transforming businesses through innovative technology solutions.',
-    },
+    statistics: [],
+    storyContent: { id: 0, title: '', paragraphs: [] },
+    missionContent: { id: 0, mission: '', vision: '' },
+    companyInfo: { id: 0, name: '', description: '' },
   });
 
   const [aboutUsLoading, setAboutUsLoading] = useState(false);
@@ -90,10 +98,12 @@ const AboutUsTab: React.FC = () => {
       //   companyInfo: companyRes.data
       // });
 
-      // For now, using the initial state data
-      console.log('About Us data loaded from initial state');
+      // For now, using mock data
+      setAboutUsData(mockAboutUsData);
     } catch (error) {
       console.error('Error fetching About Us data:', error);
+      // Fallback to mock data on error
+      setAboutUsData(mockAboutUsData);
     } finally {
       setAboutUsLoading(false);
     }
