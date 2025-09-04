@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../utilities/app.utilities';
+// import { apiURL } from '../utilities/app.utilities';
 // import axios from 'axios';
 
 interface Testimonial {
@@ -77,13 +79,15 @@ const Testimonials: React.FC = () => {
       try {
         setLoading(true);
         // Replace this URL with your actual API endpoint
-        // const response = await axios.get('/api/testimonials');
-        // setTestimonials(response.data);
+        // const response = await axios.get(`${apiURL}/testimonials`);
+        // setTestimonials(response.data.data);
 
         // For now, using default testimonials
         setTestimonials(defaultTestimonials);
       } catch (error) {
+        if(isDevelopment){
         console.error('Error fetching testimonials:', error);
+        }
         // Fallback to default testimonials on error
         setTestimonials(defaultTestimonials);
       } finally {

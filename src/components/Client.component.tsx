@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import {isDevelopment } from '../utilities/app.utilities';
+// import { apiURL } from '../utilities/app.utilities';
 // import axios from 'axios';
 
 // Types for client data
@@ -169,19 +171,21 @@ const Client: React.FC = () => {
       try {
         setLoading(true);
         // Replace these URLs with your actual API endpoints
-        // const clientsResponse = await axios.get('/api/clients');
-        // const testimonialsResponse = await axios.get('/api/testimonials');
-        // const statisticsResponse = await axios.get('/api/statistics');
-        // setClients(clientsResponse.data);
-        // setFeaturedTestimonials(testimonialsResponse.data);
-        // setStatistics(statisticsResponse.data);
+        // const clientsResponse = await axios.get(`${apiURL}/clients/clients`);
+        // const testimonialsResponse = await axios.get(`${apiURL}/clients/testimonials`);
+        // const statisticsResponse = await axios.get(`${apiURL}/clients/statistics`);
+        // setClients(clientsResponse.data.data);
+        // setFeaturedTestimonials(testimonialsResponse.data.data);
+        // setStatistics(statisticsResponse.data.data);
 
         // For now, using default data
         setClients(defaultClients);
         setFeaturedTestimonials(defaultFeaturedTestimonials);
         setStatistics(defaultStatistics);
       } catch (error) {
+        if(isDevelopment){
         console.error('Error fetching client data:', error);
+        }
         // Fallback to default data on error
         setClients(defaultClients);
         setFeaturedTestimonials(defaultFeaturedTestimonials);

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../../utilities/app.utilities';
+// import { apiURL } from '../../utilities/app.utilities';
 // import axios from 'axios';
 
 interface Testimonial {
@@ -55,13 +57,15 @@ const TestimonialsTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // const response = await axios.get('/api/testimonials');
-      // setTestimonials(response.data);
+      // const response = await axios.get(`${apiURL}/testimonials`);
+      // setTestimonials(response.data.data);
 
       // For now, using mock data
       setTestimonials(mockTestimonials);
     } catch (error) {
+      if(isDevelopment){
       console.error('Error fetching testimonials:', error);
+      }
       setTestimonials(mockTestimonials);
     } finally {
       setLoading(false);
@@ -73,14 +77,16 @@ const TestimonialsTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // const response = await axios.post('/api/testimonials', testimonial);
-      // return response.data;
-
+      // const response = await axios.post(`${apiURL}/testimonials`, testimonial);
+      // return response.data.data;
+      if(isDevelopment){
       console.log('Testimonial added:', testimonial);
+      }
       return testimonial;
     } catch (error) {
+      if(isDevelopment){
       console.error('Error adding testimonial:', error);
-      throw error;
+      }
     } finally {
       setLoading(false);
     }
@@ -91,14 +97,16 @@ const TestimonialsTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // const response = await axios.put(`/api/testimonials/${testimonial.id}`, testimonial);
-      // return response.data;
-
+      // const response = await axios.put(`${apiURL}/testimonials/${testimonial.id}`, testimonial);
+      // return response.data.data;
+      if(isDevelopment){
       console.log('Testimonial updated:', testimonial);
+      }
       return testimonial;
     } catch (error) {
+      if(isDevelopment){
       console.error('Error updating testimonial:', error);
-      throw error;
+      }
     } finally {
       setLoading(false);
     }
@@ -109,12 +117,14 @@ const TestimonialsTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // await axios.delete(`/api/testimonials/${id}`);
-
+      // await axios.delete(`${apiURL}/testimonials/${id}`);
+      if(isDevelopment){
       console.log('Testimonial deleted:', id);
+      }
     } catch (error) {
+      if(isDevelopment){
       console.error('Error deleting testimonial:', error);
-      throw error;
+      }
     } finally {
       setLoading(false);
     }
@@ -138,7 +148,9 @@ const TestimonialsTab: React.FC = () => {
         setTestimonials(updatedTestimonials);
         setEditingTestimonial(null);
       } catch (error) {
+      if(isDevelopment){
         console.error('Failed to update testimonial:', error);
+      }
       }
     }
   };
@@ -154,7 +166,9 @@ const TestimonialsTab: React.FC = () => {
       setTestimonials(updatedTestimonials);
       setShowDeleteConfirm(null);
     } catch (error) {
+      if(isDevelopment){
       console.error('Failed to delete testimonial:', error);
+      }
     }
   };
 
@@ -184,7 +198,9 @@ const TestimonialsTab: React.FC = () => {
       });
       setShowAddModal(false);
     } catch (error) {
+      if(isDevelopment){
       console.error('Failed to add testimonial:', error);
+      }
     }
   };
 

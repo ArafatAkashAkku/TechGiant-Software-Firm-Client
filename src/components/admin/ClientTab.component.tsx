@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../../utilities/app.utilities';
 // import axios from 'axios';
 
 interface Statistic {
@@ -125,13 +126,15 @@ const ClientTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // const response = await axios.get('/api/clients');
-      // setClientData(response.data);
+      // const response = await axios.get(`${apiURL}/clients/clients`);
+      // setClientData(response.data.data);
 
       // For now, using mock data
       setClientData(mockClientData);
     } catch (error) {
+      if(isDevelopment){
       console.error('Error fetching client data:', error);
+      }
       setClientData(mockClientData);
     } finally {
       setLoading(false);
@@ -143,7 +146,7 @@ const ClientTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // await axios.put('/api/clients', updatedData);
+      // await axios.put(`${apiURL}/clients/clients`, updatedData);
 
       console.log('Client data saved:', updatedData);
       setClientData(updatedData);
