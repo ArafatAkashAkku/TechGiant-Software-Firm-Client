@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../utilities/app.utilities';
+// import { apiURL } from '../utilities/app.utilities';
 // import axios from 'axios';
 
 interface SlideData {
@@ -86,13 +88,15 @@ const HeroSlider: React.FC = () => {
       try {
         setLoading(true);
         // Replace this URL with your actual API endpoint
-        // const response = await axios.get('/api/slides');
-        // setSlides(response.data);
+        // const response = await axios.get(`${apiURL}/hero-slider/`);
+        // setSlides(response.data.data);
 
         // For now, using default slides
         setSlides(defaultSlides);
       } catch (error) {
-        console.error('Error fetching slides:', error);
+        if(isDevelopment){
+          console.error('Error fetching slides:', error);
+        }
         // Fallback to default slides on error
         setSlides(defaultSlides);
       } finally {

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../../utilities/app.utilities';
+// import { apiURL } from '../../utilities/app.utilities';
 // import axios from 'axios';
 
 interface SlideData {
@@ -64,12 +66,14 @@ const HeroSliderTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // const response = await axios.get('/api/admin/hero-slider');
-      // setSlides(response.data);
+      // const response = await axios.get(`${apiURL}/hero-slider/`);
+      // setSlides(response.data.data);
 
       setSlides(mockSlides);
     } catch (error) {
-      console.error('Error fetching hero slider data:', error);
+      if(isDevelopment){
+        console.error('Error fetching hero slider data:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,15 +84,16 @@ const HeroSliderTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // const response = await axios.post('/api/admin/hero-slider', slideData);
-      // return response.data;
+      // const response = await axios.post(`${apiURL}/hero-slider/`, slideData);
+      // return response.data.data;
 
       // Mock response for now
       const newId = Math.max(...slides.map(s => s.id), 0) + 1;
       return { ...slideData, id: newId };
     } catch (error) {
-      console.error('Error adding slide:', error);
-      throw error;
+      if(isDevelopment){
+        console.error('Error adding slide:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -99,15 +104,18 @@ const HeroSliderTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // await axios.put(`/api/admin/hero-slider/${slideId}`, slideData);
-
-      setSaveMessage('Slide updated successfully!');
-      setTimeout(() => setSaveMessage(''), 3000);
+      // const response = await axios.put(`${apiURL}/hero-slider/${slideId}`, slideData);
+      // const result = response.data.success;
+      // if (result) {
+        setSaveMessage('Slide updated successfully!');
+        setTimeout(() => setSaveMessage(''), 3000);
+      // }
     } catch (error) {
-      console.error('Error updating slide:', error);
-      setSaveMessage('Error updating slide. Please try again.');
-      setTimeout(() => setSaveMessage(''), 3000);
-      throw error;
+      if(isDevelopment){
+        console.error('Error updating slide:', error);
+      }
+        setSaveMessage('Error updating slide. Please try again.');
+        setTimeout(() => setSaveMessage(''), 3000);
     } finally {
       setLoading(false);
     }
@@ -118,15 +126,18 @@ const HeroSliderTab: React.FC = () => {
     try {
       setLoading(true);
       // TODO: Replace with actual API call
-      // await axios.delete(`/api/admin/hero-slider/${slideId}`);
-
-      setSaveMessage('Slide deleted successfully!');
-      setTimeout(() => setSaveMessage(''), 3000);
+      // const response = await axios.delete(`${apiURL}/hero-slider/${slideId}`);
+      // const result = response.data.success;
+      // if (result) {
+        setSaveMessage('Slide deleted successfully!');
+        setTimeout(() => setSaveMessage(''), 3000);
+      // }
     } catch (error) {
-      console.error('Error deleting slide:', error);
+      if(isDevelopment){
+        console.error('Error deleting slide:', error);
+      }
       setSaveMessage('Error deleting slide. Please try again.');
       setTimeout(() => setSaveMessage(''), 3000);
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -158,7 +169,9 @@ const HeroSliderTab: React.FC = () => {
   const addNewSlide = async () => {
     try {
       const addedSlide = await addSlideToAPI(newSlide);
-      setSlides(prev => [...prev, addedSlide]);
+      if(addedSlide){
+        setSlides(prev => [...prev, addedSlide]);
+      }
       setNewSlide({
         title: '',
         subtitle: '',
