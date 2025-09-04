@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../../utilities/app.utilities';
+// import { apiURL } from '../../utilities/app.utilities';
+// import axios from 'axios';
 
 interface Statistic {
   id: number;
@@ -86,10 +89,10 @@ const AboutUsTab: React.FC = () => {
       setAboutUsLoading(true);
       // TODO: Replace with actual API calls
       // const [statsRes, storyRes, missionRes, companyRes] = await Promise.all([
-      //   axios.get('/api/about-us/statistics'),
-      //   axios.get('/api/about-us/story'),
-      //   axios.get('/api/about-us/mission'),
-      //   axios.get('/api/about-us/company')
+        // axios.get(`${apiURL}/about-us/statistics`),
+      //   axios.get(`${apiURL}/about-us/story`),
+      //   axios.get(`${apiURL}/about-us/mission`),
+      //   axios.get(`${apiURL}/about-us/company`)
       // ]);
       // setAboutUsData({
       //   statistics: statsRes.data,
@@ -101,7 +104,9 @@ const AboutUsTab: React.FC = () => {
       // For now, using mock data
       setAboutUsData(mockAboutUsData);
     } catch (error) {
+      if(isDevelopment){
       console.error('Error fetching About Us data:', error);
+      }
       // Fallback to mock data on error
       setAboutUsData(mockAboutUsData);
     } finally {
@@ -116,17 +121,19 @@ const AboutUsTab: React.FC = () => {
 
       // TODO: Replace with actual API calls
       // await Promise.all([
-      //   axios.put('/api/about-us/statistics', aboutUsData.statistics),
-      //   axios.put('/api/about-us/story', aboutUsData.storyContent),
-      //   axios.put('/api/about-us/mission', aboutUsData.missionContent),
-      //   axios.put('/api/about-us/company', aboutUsData.companyInfo)
+      //   axios.put(`${apiURL}/about-us/statistics`, aboutUsData.statistics),
+      //   axios.put(`${apiURL}/about-us/story`, aboutUsData.storyContent),
+      //   axios.put(`${apiURL}/about-us/mission`, aboutUsData.missionContent),
+      //   axios.put(`${apiURL}/about-us/company`, aboutUsData.companyInfo)
       // ]);
 
       setAboutUsSaveMessage('About Us content saved successfully!');
 
       setTimeout(() => setAboutUsSaveMessage(''), 3000);
     } catch (error) {
+      if(isDevelopment){
       console.error('Error saving About Us data:', error);
+      }
       setAboutUsSaveMessage('Error saving About Us content. Please try again.');
     } finally {
       setAboutUsLoading(false);

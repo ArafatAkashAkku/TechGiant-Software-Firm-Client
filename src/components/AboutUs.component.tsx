@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { isDevelopment } from '../utilities/app.utilities';
+// import { apiURL } from '../utilities/app.utilities';
 // import axios from 'axios';
 
 interface Statistic {
@@ -101,26 +103,28 @@ const AboutUs: React.FC = () => {
         setLoading(true);
 
         // Fetch statistics data
-        // const statisticsResponse = await axios.get('/api/statistics');
-        // setStatistics(statisticsResponse.data);
+        // const statisticsResponse = await axios.get(`${apiURL}/about-us/statistics`);
+        // setStatistics(statisticsResponse.data.data);
         setStatistics(defaultStatistics);
 
         // Fetch story content
-        // const storyResponse = await axios.get('/api/story');
-        // setStoryContent(storyResponse.data);
+        // const storyResponse = await axios.get(`${apiURL}/about-us/story`);
+        // setStoryContent(storyResponse.data.data);
         setStoryContent(defaultStoryContent);
 
         // Fetch mission content
-        // const missionResponse = await axios.get('/api/mission');
-        // setMissionContent(missionResponse.data);
+        // const missionResponse = await axios.get(`${apiURL}/about-us/mission`);
+        // setMissionContent(missionResponse.data.data);
         setMissionContent(defaultMissionContent);
 
         // Fetch company info
-        // const companyResponse = await axios.get('/api/company');
-        // setCompanyInfo(companyResponse.data);
+        // const companyResponse = await axios.get(`${apiURL}/about-us/company`);
+        // setCompanyInfo(companyResponse.data.data);
         setCompanyInfo(defaultCompanyInfo);
       } catch (error) {
+        if(isDevelopment){
         console.error('Error fetching content:', error);
+        }
         // Fallback to default content on error
         setStatistics(defaultStatistics);
         setStoryContent(defaultStoryContent);
