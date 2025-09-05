@@ -291,7 +291,7 @@ const Testimonials: React.FC = () => {
         </div>
 
         {/* Statistics */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        {/* <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
             <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
               500+
@@ -316,7 +316,7 @@ const Testimonials: React.FC = () => {
             </div>
             <div className="text-gray-600 dark:text-gray-400">Support Available</div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

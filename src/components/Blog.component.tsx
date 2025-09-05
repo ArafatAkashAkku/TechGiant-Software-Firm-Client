@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// import axios from 'axios';
+import axios from 'axios';
+import { mockAPI } from '../utilities/app.utilities';
 
 interface BlogPost {
   id: number;
@@ -74,14 +75,20 @@ const Blog: React.FC = () => {
       try {
         setLoading(true);
 
-        // Uncomment and replace with your actual API call
-        // const response = await axios.get('/api/blogs?limit=3');
-        // setBlogs(response.data);
-
-        // Simulate API call delay
-        setBlogs(defaultBlogs);
+        // API call to fetch blog posts
+        const response = await axios.get('/api/v1/blog/posts?limit=3&published=true');
+        setBlogs(response.data.data || []);
+        if (mockAPI) {
+          setBlogs(defaultBlogs);
+        } else {
+          // API call to fetch blog posts
+          const response = await axios.get('/api/v1/blog/posts?limit=3&published=true');
+          setBlogs(response.data.data || []);
+        }
       } catch (error) {
-        console.error('Error fetching blogs:', error);
+        if (isDevelopment) {
+          console.log('Error fetching blogs:', error);
+        }
         // Fallback to default blogs on error
         setBlogs(defaultBlogs);
       } finally {

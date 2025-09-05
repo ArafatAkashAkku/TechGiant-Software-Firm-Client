@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
 import axios from 'axios';
+import { showErrorToast, showSuccessToast } from '../../utilities/toast.utilities';
 
 interface Statistic {
   id: number;
@@ -76,7 +77,6 @@ const AboutUsTab: React.FC = () => {
   });
 
   const [aboutUsLoading, setAboutUsLoading] = useState(false);
-  const [aboutUsSaveMessage, setAboutUsSaveMessage] = useState('');
 
   // Load About Us data on component mount
   useEffect(() => {
@@ -109,8 +109,7 @@ const AboutUsTab: React.FC = () => {
       if (isDevelopment) {
         console.log('Error fetching About Us data:', error);
       }
-      // Fallback to mock data on error
-      setAboutUsData(mockAboutUsData);
+      showErrorToast('Error fetching About Us content. Please try again.');
     } finally {
       setAboutUsLoading(false);
     }
@@ -119,20 +118,9 @@ const AboutUsTab: React.FC = () => {
   const saveAboutUsData = async () => {
     try {
       setAboutUsLoading(true);
-      setAboutUsSaveMessage('');
-
-      // TODO: Replace with actual API calls
-      // await Promise.all([
-      //   axios.put(`${apiURL}/about-us/statistics`, aboutUsData.statistics),
-      //   axios.put(`${apiURL}/about-us/story`, aboutUsData.storyContent),
-      //   axios.put(`${apiURL}/about-us/mission`, aboutUsData.missionContent),
-      //   axios.put(`${apiURL}/about-us/company`, aboutUsData.companyInfo)
-      // ]);
 
       if (mockAPI) {
-        setAboutUsSaveMessage('About Us content saved successfully!');
-
-        setTimeout(() => setAboutUsSaveMessage(''), 3000);
+        showSuccessToast('About Us content saved successfully!');
       } else {
         // TODO: Replace with actual API calls
         await Promise.all([
@@ -141,15 +129,13 @@ const AboutUsTab: React.FC = () => {
           axios.put(`${apiURL}/about-us/mission`, aboutUsData.missionContent),
           axios.put(`${apiURL}/about-us/company`, aboutUsData.companyInfo),
         ]);
-        setAboutUsSaveMessage('About Us content saved successfully!');
-
-        setTimeout(() => setAboutUsSaveMessage(''), 3000);
+        showSuccessToast('About Us content saved successfully!');
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error saving About Us data:', error);
       }
-      setAboutUsSaveMessage('Error saving About Us content. Please try again.');
+      showErrorToast('Error saving About Us content. Please try again.');
     } finally {
       setAboutUsLoading(false);
     }
@@ -237,6 +223,17 @@ const AboutUsTab: React.FC = () => {
     });
   };
 
+  if (aboutUsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading content...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Company Information */}
@@ -253,7 +250,7 @@ const AboutUsTab: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={aboutUsData.companyInfo.name}
+                value={aboutUsData.companyInfo?.name ?? ''}
                 onChange={e => handleCompanyInfoChange('name', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 placeholder="Enter company name"
@@ -264,7 +261,7 @@ const AboutUsTab: React.FC = () => {
                 Company Description
               </label>
               <textarea
-                value={aboutUsData.companyInfo.description}
+                value={aboutUsData.companyInfo?.description ?? ''}
                 onChange={e => handleCompanyInfoChange('description', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -426,7 +423,7 @@ const AboutUsTab: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={aboutUsData.storyContent.title}
+                value={aboutUsData.storyContent?.title ?? ''}
                 onChange={e => handleStoryChange('title', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 placeholder="Enter story title"
@@ -489,7 +486,7 @@ const AboutUsTab: React.FC = () => {
                 Mission Statement
               </label>
               <textarea
-                value={aboutUsData.missionContent.mission}
+                value={aboutUsData.missionContent?.mission ?? ''}
                 onChange={e => handleMissionChange('mission', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -501,7 +498,7 @@ const AboutUsTab: React.FC = () => {
                 Vision Statement
               </label>
               <textarea
-                value={aboutUsData.missionContent.vision}
+                value={aboutUsData.missionContent?.vision ?? ''}
                 onChange={e => handleMissionChange('vision', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -564,17 +561,6 @@ const AboutUsTab: React.FC = () => {
                 </>
               )}
             </button>
-            {aboutUsSaveMessage && (
-              <span
-                className={`text-sm ${
-                  aboutUsSaveMessage.includes('successfully')
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400'
-                }`}
-              >
-                {aboutUsSaveMessage}
-              </span>
-            )}
           </div>
         </div>
       </div>

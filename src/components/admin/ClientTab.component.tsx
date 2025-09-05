@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
 import axios from 'axios';
+import { showErrorToast, showSuccessToast } from '../../utilities/toast.utilities';
 
 interface Statistic {
   id: number;
@@ -151,7 +152,6 @@ const ClientTab: React.FC = () => {
       if (isDevelopment) {
         console.log('Error fetching client data:', error);
       }
-      setClientData(mockClientData);
     } finally {
       setLoading(false);
     }
@@ -170,7 +170,8 @@ const ClientTab: React.FC = () => {
         setClientData(updatedData);
       }
     } catch (error) {
-      console.log('Error saving client data:', error);
+      if (isDevelopment) console.log('Error saving client data:', error);
+      showErrorToast('Error saving client data');
     } finally {
       setLoading(false);
     }
@@ -188,23 +189,29 @@ const ClientTab: React.FC = () => {
   const handleSaveClient = async () => {
     if (editingClient) {
       try {
-        if (!mockAPI) {
+        if (mockAPI) {
+          const updatedClients = (clientData.clients || []).map(c =>
+            c.id === editingClient.id ? editingClient : c
+          );
+          await saveClientData({ ...clientData, clients: updatedClients });
+        } else {
           // Make API call to update client
-          await axios.put(`${apiURL}/clients/clients/${editingClient.id}`, {
+          const response = await axios.put(`${apiURL}/clients/clients/${editingClient.id}`, {
             name: editingClient.name,
             logo: editingClient.logo,
             website: editingClient.website,
             industry: editingClient.industry,
           });
-        }
 
-        const updatedClients = (clientData.clients || []).map(c =>
-          c.id === editingClient.id ? editingClient : c
-        );
-        await saveClientData({ ...clientData, clients: updatedClients });
+          if (response.data.success) {
+            showSuccessToast('Client updated successfully');
+          }
+          fetchClientData();
+        }
         setEditingClient(null);
       } catch (error) {
-        console.error('Error updating client:', error);
+        if (isDevelopment) console.log('Error updating client:', error);
+        showErrorToast('Error updating client');
       }
     }
   };
@@ -214,16 +221,21 @@ const ClientTab: React.FC = () => {
   };
   const handleDeleteClient = async (id: number) => {
     try {
-      if (!mockAPI) {
+      if (mockAPI) {
+        const updatedClients = (clientData.clients || []).filter(c => c.id !== id);
+        await saveClientData({ ...clientData, clients: updatedClients });
+      } else {
         // Make API call to delete client
-        await axios.delete(`${apiURL}/clients/clients/${id}`);
+        const response = await axios.delete(`${apiURL}/clients/clients/${id}`);
+        if (response.data.success) {
+          showSuccessToast('Client deleted successfully');
+        }
+        fetchClientData();
       }
-
-      const updatedClients = (clientData.clients || []).filter(c => c.id !== id);
-      await saveClientData({ ...clientData, clients: updatedClients });
       setShowDeleteConfirm(null);
     } catch (error) {
-      console.error('Error deleting client:', error);
+      if (isDevelopment) console.log('Error deleting client:', error);
+      showErrorToast('Error deleting client');
     }
   };
 
@@ -231,18 +243,21 @@ const ClientTab: React.FC = () => {
     try {
       let clientToAdd: Client;
 
-      if (!mockAPI) {
+      if (mockAPI) {
+        const newId = Math.max(...(clientData.clients || []).map(c => c.id), 0) + 1;
+        clientToAdd = { ...newClient, id: newId };
         // Make API call to create client
+      } else {
         const response = await axios.post(`${apiURL}/clients/clients`, {
           name: newClient.name,
           logo: newClient.logo,
           website: newClient.website,
           industry: newClient.industry,
         });
-        clientToAdd = response.data.data;
-      } else {
-        const newId = Math.max(...(clientData.clients || []).map(c => c.id), 0) + 1;
-        clientToAdd = { ...newClient, id: newId };
+        if (response.data.success) {
+          showSuccessToast('Client added successfully');
+        }
+        fetchClientData();
       }
 
       const updatedClients = [...(clientData.clients || []), clientToAdd];
@@ -262,23 +277,28 @@ const ClientTab: React.FC = () => {
   const handleSaveStatistic = async () => {
     if (editingStatistic) {
       try {
-        if (!mockAPI) {
+        if (mockAPI) {
+          const updatedStatistics = (clientData.statistics || []).map(s =>
+            s.id === editingStatistic.id ? editingStatistic : s
+          );
+          await saveClientData({ ...clientData, statistics: updatedStatistics });
+        } else {
           // Make API call to update statistic
-          await axios.put(`${apiURL}/clients/statistics/${editingStatistic.id}`, {
+          const response = await axios.put(`${apiURL}/clients/statistics/${editingStatistic.id}`, {
             value: editingStatistic.value,
             label: editingStatistic.label,
             icon: editingStatistic.icon,
             suffix: editingStatistic.suffix,
           });
+          if (response.data.success) {
+            showSuccessToast('Statistic updated successfully');
+          }
+          fetchClientData();
         }
-
-        const updatedStatistics = (clientData.statistics || []).map(s =>
-          s.id === editingStatistic.id ? editingStatistic : s
-        );
-        await saveClientData({ ...clientData, statistics: updatedStatistics });
         setEditingStatistic(null);
       } catch (error) {
-        console.error('Error updating statistic:', error);
+        if (isDevelopment) console.log('Error updating statistic:', error);
+        showErrorToast('Error updating statistic');
       }
     }
   };
@@ -288,16 +308,21 @@ const ClientTab: React.FC = () => {
   };
   const handleDeleteStatistic = async (id: number) => {
     try {
-      if (!mockAPI) {
+      if (mockAPI) {
+        const updatedStatistics = (clientData.statistics || []).filter(s => s.id !== id);
+        await saveClientData({ ...clientData, statistics: updatedStatistics });
+      } else {
         // Make API call to delete statistic
-        await axios.delete(`${apiURL}/clients/statistics/${id}`);
+        const response = await axios.delete(`${apiURL}/clients/statistics/${id}`);
+        if (response.data.success) {
+          showSuccessToast('Statistic deleted successfully');
+        }
+        fetchClientData();
       }
-
-      const updatedStatistics = (clientData.statistics || []).filter(s => s.id !== id);
-      await saveClientData({ ...clientData, statistics: updatedStatistics });
       setShowDeleteConfirm(null);
     } catch (error) {
-      console.error('Error deleting statistic:', error);
+      if (isDevelopment) console.log('Error deleting statistic:', error);
+      showErrorToast('Error deleting statistic');
     }
   };
 
@@ -305,18 +330,21 @@ const ClientTab: React.FC = () => {
     try {
       let statisticToAdd: Statistic;
 
-      if (!mockAPI) {
+      if (mockAPI) {
+        const newId = Math.max(...(clientData.statistics || []).map(s => s.id), 0) + 1;
+        statisticToAdd = { ...newStatistic, id: newId };
         // Make API call to create statistic
+      } else {
         const response = await axios.post(`${apiURL}/clients/statistics`, {
           value: newStatistic.value,
           label: newStatistic.label,
           icon: newStatistic.icon,
           suffix: newStatistic.suffix,
         });
-        statisticToAdd = response.data.data;
-      } else {
-        const newId = Math.max(...(clientData.statistics || []).map(s => s.id), 0) + 1;
-        statisticToAdd = { ...newStatistic, id: newId };
+        if (response.data.success) {
+          showSuccessToast('Statistic added successfully');
+        }
+        fetchClientData();
       }
 
       const updatedStatistics = [...(clientData.statistics || []), statisticToAdd];
@@ -324,7 +352,8 @@ const ClientTab: React.FC = () => {
       setNewStatistic({ value: 0, label: '', icon: '', suffix: '' });
       setShowAddModal(false);
     } catch (error) {
-      console.error('Error adding statistic:', error);
+      if (isDevelopment) console.log('Error adding statistic:', error);
+      showErrorToast('Error adding statistic');
     }
   };
 

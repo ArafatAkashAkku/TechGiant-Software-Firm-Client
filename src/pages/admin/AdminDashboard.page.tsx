@@ -6,6 +6,11 @@ import TestimonialsTab from '../../components/admin/TestimonialsTab.component';
 import ClientTab from '../../components/admin/ClientTab.component';
 import HeroSliderTab from '../../components/admin/HeroSliderTab.component';
 import AboutUsTab from '../../components/admin/AboutUsTab.component';
+import BlogTab from '../../components/admin/BlogTab.component';
+import ContactInfoTab from '../../components/admin/ContactInfoTab.component';
+import ContactsTab from '../../components/admin/ContactsTab.component';
+import CareerTab from '../../components/admin/CareerTab.component';
+import ApplicantTab from '../../components/admin/ApplicantTab.component';
 
 // import axios from 'axios';
 
@@ -16,7 +21,7 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      logout();
       navigate('/admin/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -29,6 +34,11 @@ const AdminDashboard = () => {
     { id: 'heroslider', name: 'Hero Slider', icon: '🖼️' },
     { id: 'aboutus', name: 'About Us', icon: 'ℹ️' },
     { id: 'testimonials', name: 'Testimonials', icon: '💬' },
+    { id: 'blog', name: 'Blog', icon: '📝' },
+    { id: 'contactinfo', name: 'Contact Info', icon: '📞' },
+    { id: 'contacts', name: 'Contacts', icon: '📧' },
+    { id: 'career', name: 'Careers', icon: '💼' },
+    { id: 'applicants', name: 'Applicants', icon: '👥' },
     { id: 'overview', name: 'Overview', icon: '📊' },
     { id: 'client', name: 'Client', icon: '🏢' },
   ];
@@ -45,7 +55,16 @@ const AdminDashboard = () => {
         return <HeroSliderTab />;
       case 'aboutus':
         return <AboutUsTab />;
-
+      case 'blog':
+        return <BlogTab />;
+      case 'contactinfo':
+        return <ContactInfoTab />;
+      case 'contacts':
+        return <ContactsTab />;
+      case 'career':
+        return <CareerTab />;
+      case 'applicants':
+        return <ApplicantTab />;
       default:
         return null;
     }

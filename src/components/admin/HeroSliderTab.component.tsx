@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
 import axios from 'axios';
+import { showErrorToast, showSuccessToast } from '../../utilities/toast.utilities';
 
 interface SlideData {
   id: number;
@@ -14,7 +15,6 @@ interface SlideData {
 const HeroSliderTab: React.FC = () => {
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saveMessage, setSaveMessage] = useState('');
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
@@ -69,7 +69,6 @@ const HeroSliderTab: React.FC = () => {
       if (mockAPI) {
         setSlides(mockSlides);
       } else {
-        // TODO: Replace with actual API call
         const response = await axios.get(`${apiURL}/hero-slider/`);
         setSlides(response.data.data);
       }
@@ -77,8 +76,38 @@ const HeroSliderTab: React.FC = () => {
       if (isDevelopment) {
         console.log('Error fetching hero slider data:', error);
       }
+      showErrorToast('Error fetching hero slider data. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch individual slide data from API for editing
+  const fetchSlideForEditing = async (slideId: number) => {
+    try {
+      if (mockAPI) {
+        // Use mock data for development
+        const mockSlide = mockSlides.find(slide => slide.id === slideId);
+        if (mockSlide) {
+          setSlides(prev => prev.map(slide => (slide.id === slideId ? mockSlide : slide)));
+        }
+      } else {
+        const response = await axios.get(`${apiURL}/hero-slider/${slideId}`);
+        if (response.data.success) {
+          const slideData = response.data.data;
+          // Ensure the slide data has the correct structure
+          const formattedSlideData = {
+            ...slideData,
+            bulletPoints: slideData.bulletPoints || [],
+          };
+          setSlides(prev => prev.map(slide => (slide.id === slideId ? formattedSlideData : slide)));
+        }
+      }
+    } catch (error) {
+      if (isDevelopment) {
+        console.log('Error fetching slide for editing:', error);
+      }
+      showErrorToast('Error loading slide data for editing.');
     }
   };
 
@@ -86,10 +115,10 @@ const HeroSliderTab: React.FC = () => {
   const addSlideToAPI = async (slideData: Omit<SlideData, 'id'>, imageFile?: File) => {
     try {
       setLoading(true);
-
       if (mockAPI) {
         // Mock response for now
         const newId = Math.max(...slides.map(s => s.id), 0) + 1;
+        showSuccessToast('New slide added successfully!');
         return { ...slideData, id: newId };
       } else {
         // Create FormData for file upload
@@ -111,12 +140,16 @@ const HeroSliderTab: React.FC = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        return response.data.data;
+        if (response.data.success) {
+          showSuccessToast('New slide added successfully!');
+        }
+        fetchHeroSliderData();
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error adding slide:', error);
       }
+      showErrorToast('Error adding slide. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -127,8 +160,7 @@ const HeroSliderTab: React.FC = () => {
     try {
       setLoading(true);
       if (mockAPI) {
-        setSaveMessage('Slide updated successfully!');
-        setTimeout(() => setSaveMessage(''), 3000);
+        showSuccessToast('Slide updated successfully!');
       } else {
         // Create FormData for file upload
         const formData = new FormData();
@@ -149,18 +181,16 @@ const HeroSliderTab: React.FC = () => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        const result = response.data.success;
-        if (result) {
-          setSaveMessage('Slide updated successfully!');
-          setTimeout(() => setSaveMessage(''), 3000);
+        if (response.data.success) {
+          showSuccessToast('Slide updated successfully!');
         }
+        fetchHeroSliderData();
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error updating slide:', error);
       }
-      setSaveMessage('Error updating slide. Please try again.');
-      setTimeout(() => setSaveMessage(''), 3000);
+      showErrorToast('Error updating slide. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -171,23 +201,20 @@ const HeroSliderTab: React.FC = () => {
     try {
       setLoading(true);
       if (mockAPI) {
-        setSaveMessage('Slide deleted successfully!');
-        setTimeout(() => setSaveMessage(''), 3000);
+        showSuccessToast('Slide deleted successfully!');
       } else {
         // TODO: Replace with actual API call
         const response = await axios.delete(`${apiURL}/hero-slider/${slideId}`);
-        const result = response.data.success;
-        if (result) {
-          setSaveMessage('Slide deleted successfully!');
-          setTimeout(() => setSaveMessage(''), 3000);
+        if (response.data.success) {
+          showSuccessToast('Slide deleted successfully!');
         }
+        fetchHeroSliderData();
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error deleting slide:', error);
       }
-      setSaveMessage('Error deleting slide. Please try again.');
-      setTimeout(() => setSaveMessage(''), 3000);
+      showErrorToast('Error deleting slide. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -218,7 +245,6 @@ const HeroSliderTab: React.FC = () => {
 
   const addNewSlide = async () => {
     try {
-      console.log('Adding new slide with image file:', newSlideImageFile);
       const addedSlide = await addSlideToAPI(newSlide, newSlideImageFile || undefined);
       if (addedSlide) {
         setSlides(prev => [...prev, addedSlide]);
@@ -232,11 +258,10 @@ const HeroSliderTab: React.FC = () => {
       });
       setNewSlideImageFile(null);
       setShowAddModal(false);
-      setSaveMessage('New slide added successfully!');
-      setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
-      setSaveMessage('Error adding new slide. Please try again.');
-      setTimeout(() => setSaveMessage(''), 3000);
+      if (isDevelopment) {
+        console.log('Error adding new slide:', error);
+      }
     }
   };
 
@@ -250,7 +275,9 @@ const HeroSliderTab: React.FC = () => {
       setSlides(prev => prev.filter(slide => slide.id !== slideId));
       setShowDeleteConfirm(null);
     } catch (error) {
-      // Error message is handled in deleteSlideFromAPI
+      if (isDevelopment) {
+        console.log('Error deleting slide:', error);
+      }
       setShowDeleteConfirm(null);
     }
   };
@@ -274,7 +301,9 @@ const HeroSliderTab: React.FC = () => {
         });
       }
     } catch (error) {
-      // Error message is handled in updateSlideInAPI
+      if (isDevelopment) {
+        console.log('Error updating slide:', error);
+      }
       setIsEditing(null);
     }
   };
@@ -312,6 +341,11 @@ const HeroSliderTab: React.FC = () => {
 
         <div className="p-6">
           <div className="space-y-6">
+            {slides.length === 0 && (
+              <div className="text-center">
+                <p className="text-gray-600 dark:text-gray-400">No slides found.</p>
+              </div>
+            )}
             {slides.map(slide => (
               <div
                 key={slide.id}
@@ -339,7 +373,10 @@ const HeroSliderTab: React.FC = () => {
                       </>
                     ) : (
                       <button
-                        onClick={() => setIsEditing(slide.id)}
+                        onClick={async () => {
+                          setIsEditing(slide.id);
+                          await fetchSlideForEditing(slide.id);
+                        }}
                         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
                       >
                         Edit
@@ -421,7 +458,11 @@ const HeroSliderTab: React.FC = () => {
                       {slide.image && (
                         <div className="mt-2">
                           <img
-                            src={slide.image}
+                            src={
+                              slide.image.startsWith('data:') || slide.image.startsWith('http')
+                                ? slide.image
+                                : `${apiURL}/uploads/${slide.image}`
+                            }
                             alt="Preview"
                             className="w-32 h-20 object-cover rounded-md"
                           />
@@ -468,18 +509,6 @@ const HeroSliderTab: React.FC = () => {
               </div>
             ))}
           </div>
-
-          {saveMessage && (
-            <div
-              className={`mt-4 p-4 rounded-md ${
-                saveMessage.includes('Error')
-                  ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                  : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-              }`}
-            >
-              {saveMessage}
-            </div>
-          )}
         </div>
       </div>
 

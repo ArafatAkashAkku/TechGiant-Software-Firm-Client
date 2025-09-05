@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-// import axios from 'axios';
+import axios from 'axios';
 
 interface BlogPost {
   id: number;
@@ -152,7 +152,7 @@ const BlogDetailPage: React.FC = () => {
     },
   ];
 
-  // Fetch blog post - replace with actual API call
+  // Fetch blog post from API
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -165,17 +165,39 @@ const BlogDetailPage: React.FC = () => {
           return;
         }
 
-        // Uncomment and replace with your actual API call
-        // const response = await axios.get(`/api/blogs/${blogId}`);
-        // setBlog(response.data);
+        // Fetch blog post and related posts concurrently
+        const [blogResponse, relatedResponse] = await Promise.all([
+          axios.get(`/api/v1/blog/posts/${blogId}`),
+          axios.get(`/api/v1/blog/posts/${blogId}/related?limit=3`),
+        ]);
 
-        // Simulate API call delay
-        setTimeout(() => {
-          const foundBlog = defaultBlogs.find(b => b.id === parseInt(blogId));
+        const blogData = blogResponse.data.data;
+        const relatedData = relatedResponse.data.data || [];
+
+        if (blogData) {
+          setBlog(blogData);
+          setRelatedPosts(
+            relatedData.map((b: any) => ({
+              id: b.id,
+              title: b.title,
+              excerpt: b.excerpt,
+              image: b.image,
+              category: b.category,
+            }))
+          );
+        } else {
+          setError('Blog post not found');
+        }
+      } catch (error: any) {
+        console.error('Error fetching blog:', error);
+        if (error.response?.status === 404) {
+          setError('Blog post not found');
+        } else {
+          setError('Failed to load blog post');
+          // Fallback to default blogs on error
+          const foundBlog = defaultBlogs.find(b => b.id === parseInt(blogId || '0'));
           if (foundBlog) {
             setBlog(foundBlog);
-
-            // Get related posts (same category, different ID)
             const related = defaultBlogs
               .filter(b => b.category === foundBlog.category && b.id !== foundBlog.id)
               .slice(0, 3)
@@ -187,14 +209,9 @@ const BlogDetailPage: React.FC = () => {
                 category: b.category,
               }));
             setRelatedPosts(related);
-          } else {
-            setError('Blog post not found');
           }
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error('Error fetching blog:', error);
-        setError('Failed to load blog post');
+        }
+      } finally {
         setLoading(false);
       }
     };

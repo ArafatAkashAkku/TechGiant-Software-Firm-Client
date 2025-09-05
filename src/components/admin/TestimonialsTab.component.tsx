@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
 import axios from 'axios';
+import { showErrorToast, showSuccessToast } from '../../utilities/toast.utilities';
 
 interface Testimonial {
   id: number;
@@ -69,7 +70,6 @@ const TestimonialsTab: React.FC = () => {
       if (isDevelopment) {
         console.log('Error fetching testimonials:', error);
       }
-      setTestimonials(mockTestimonials);
     } finally {
       setLoading(false);
     }
@@ -85,12 +85,16 @@ const TestimonialsTab: React.FC = () => {
       } else {
         // TODO: Replace with actual API call
         const response = await axios.post(`${apiURL}/testimonials`, testimonial);
-        return response.data.data;
+        if (response.data.success) {
+          showSuccessToast('Testimonial added successfully');
+        }
+        fetchTestimonialsData();
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error adding testimonial:', error);
       }
+      showErrorToast('Error adding testimonial');
     } finally {
       setLoading(false);
     }
@@ -106,12 +110,16 @@ const TestimonialsTab: React.FC = () => {
       } else {
         // TODO: Replace with actual API call
         const response = await axios.put(`${apiURL}/testimonials/${testimonial.id}`, testimonial);
-        return response.data.data;
+        if (response.data.success) {
+          showSuccessToast('Testimonial updated successfully');
+        }
+        fetchTestimonialsData();
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error updating testimonial:', error);
       }
+      showErrorToast('Error updating testimonial');
     } finally {
       setLoading(false);
     }
@@ -121,15 +129,21 @@ const TestimonialsTab: React.FC = () => {
   const deleteTestimonialFromAPI = async (id: number) => {
     try {
       setLoading(true);
-
-      if (!mockAPI) {
+      if (mockAPI) {
+        showSuccessToast('Testimonial deleted successfully!');
+      } else {
         // TODO: Replace with actual API call
-        await axios.delete(`${apiURL}/testimonials/${id}`);
+        const response = await axios.delete(`${apiURL}/testimonials/${id}`);
+        if (response.data.success) {
+          showSuccessToast('Testimonial deleted successfully');
+        }
+        fetchTestimonialsData();
       }
     } catch (error) {
       if (isDevelopment) {
         console.log('Error deleting testimonial:', error);
       }
+      showErrorToast('Error deleting testimonial');
     } finally {
       setLoading(false);
     }
@@ -227,6 +241,14 @@ const TestimonialsTab: React.FC = () => {
     ));
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-4">
+        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -248,6 +270,12 @@ const TestimonialsTab: React.FC = () => {
       )}
 
       <div className="grid gap-6">
+        {testimonials && testimonials.length === 0 && (
+          <div className="text-center py-4">
+            <div className="text-gray-600 dark:text-gray-400">No testimonials found.</div>{' '}
+          </div>
+        )}
+
         {(testimonials || []).map(testimonial => (
           <div key={testimonial.id} className="border dark:border-gray-700 rounded-lg p-6">
             {editingTestimonial && editingTestimonial.id === testimonial.id ? (

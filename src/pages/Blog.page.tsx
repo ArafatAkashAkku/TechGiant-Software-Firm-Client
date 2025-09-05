@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// import axios from 'axios';
+import axios from 'axios';
+import { apiURL, isDevelopment, mockAPI } from '../utilities/app.utilities';
 
 interface BlogPost {
   id: number;
@@ -116,33 +117,45 @@ const BlogPage: React.FC = () => {
     },
   ];
 
-  // Get unique categories
-  const categories = ['All', ...Array.from(new Set(defaultBlogs.map(blog => blog.category)))];
+  // State for categories
+  const [categories, setCategories] = useState<string[]>(['All']);
 
-  // Fetch all blogs - replace URL with your actual API endpoint
+  // Fetch all blogs and categories from API
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
+        if (mockAPI) {
+          // Simulate API call delay
+          setBlogs(defaultBlogs);
+          setFilteredBlogs(defaultBlogs);
+        } else {
+          const [blogsResponse, categoriesResponse] = await Promise.all([
+            axios.get(`${apiURL}/blog/posts?published=true`),
+            axios.get(`${apiURL}/blog/categories`),
+          ]);
 
-        // Uncomment and replace with your actual API call
-        // const response = await axios.get('/api/blogs');
-        // setBlogs(response.data);
+          const blogData = blogsResponse.data?.data;
+          const categoryData = categoriesResponse.data?.data;
+          setBlogs(Array.isArray(blogData) ? blogData : []);
+          setFilteredBlogs(Array.isArray(blogData) ? blogData : []);
 
-        // Simulate API call delay
-        setBlogs(defaultBlogs);
-        setFilteredBlogs(defaultBlogs);
+          setCategories(['All', ...categoryData]);
+        }
       } catch (error) {
-        console.error('Error fetching blogs:', error);
+        if (isDevelopment) {
+          console.log('Error fetching data:', error);
+        }
         // Fallback to default blogs on error
         setBlogs(defaultBlogs);
         setFilteredBlogs(defaultBlogs);
+        setCategories(['All', ...Array.from(new Set(defaultBlogs.map(blog => blog.category)))]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlogs();
+    fetchData();
   }, []);
 
   // Filter blogs based on category and search term
