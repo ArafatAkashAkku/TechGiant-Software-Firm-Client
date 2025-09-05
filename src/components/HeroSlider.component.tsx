@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { isDevelopment } from '../utilities/app.utilities';
-// import { apiURL } from '../utilities/app.utilities';
-// import axios from 'axios';
+import { isDevelopment, apiURL, mockAPI } from '../utilities/app.utilities';
+import axios from 'axios';
 
 interface SlideData {
   id: number;
@@ -87,15 +86,17 @@ const HeroSlider: React.FC = () => {
     const fetchSlides = async () => {
       try {
         setLoading(true);
-        // Replace this URL with your actual API endpoint
-        // const response = await axios.get(`${apiURL}/hero-slider/`);
-        // setSlides(response.data.data);
-
-        // For now, using default slides
-        setSlides(defaultSlides);
+        if (mockAPI) {
+          // For now, using default slides
+          setSlides(defaultSlides);
+        } else {
+          //  Replace this URL with your actual API endpoint
+          const response = await axios.get(`${apiURL}/hero-slider/`);
+          setSlides(response.data.data);
+        }
       } catch (error) {
-        if(isDevelopment){
-          console.error('Error fetching slides:', error);
+        if (isDevelopment) {
+          console.log('Error fetching slides:', error);
         }
         // Fallback to default slides on error
         setSlides(defaultSlides);
@@ -168,7 +169,16 @@ const HeroSlider: React.FC = () => {
           >
             {/* Background Image */}
             <div className="absolute inset-0">
-              <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
+              ( if(!mockAPI)
+              {
+                <img
+                  src={`${apiURL}/uploads/${slide.image}`}
+                  alt={slide.title}
+                  className="w-full h-full object-cover"
+                />
+              }{' '}
+              else
+              {<img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />})
               <div className="absolute inset-0 bg-black bg-opacity-40 dark:bg-black dark:bg-opacity-60"></div>
             </div>
 

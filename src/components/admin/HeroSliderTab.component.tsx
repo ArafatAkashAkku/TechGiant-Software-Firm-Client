@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { isDevelopment } from '../../utilities/app.utilities';
-// import { apiURL } from '../../utilities/app.utilities';
-// import axios from 'axios';
+import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
+import axios from 'axios';
 
 interface SlideData {
   id: number;
@@ -26,6 +25,8 @@ const HeroSliderTab: React.FC = () => {
     image: '',
     bulletPoints: ['', '', '', ''],
   });
+  const [newSlideImageFile, setNewSlideImageFile] = useState<File | null>(null);
+  const [editingImageFiles, setEditingImageFiles] = useState<{ [key: number]: File }>({});
 
   // Mock data for now
   const mockSlides: SlideData[] = [
@@ -65,14 +66,16 @@ const HeroSliderTab: React.FC = () => {
   const fetchHeroSliderData = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.get(`${apiURL}/hero-slider/`);
-      // setSlides(response.data.data);
-
-      setSlides(mockSlides);
+      if (mockAPI) {
+        setSlides(mockSlides);
+      } else {
+        // TODO: Replace with actual API call
+        const response = await axios.get(`${apiURL}/hero-slider/`);
+        setSlides(response.data.data);
+      }
     } catch (error) {
-      if(isDevelopment){
-        console.error('Error fetching hero slider data:', error);
+      if (isDevelopment) {
+        console.log('Error fetching hero slider data:', error);
       }
     } finally {
       setLoading(false);
@@ -80,19 +83,39 @@ const HeroSliderTab: React.FC = () => {
   };
 
   // Add new slide to API
-  const addSlideToAPI = async (slideData: Omit<SlideData, 'id'>) => {
+  const addSlideToAPI = async (slideData: Omit<SlideData, 'id'>, imageFile?: File) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.post(`${apiURL}/hero-slider/`, slideData);
-      // return response.data.data;
 
-      // Mock response for now
-      const newId = Math.max(...slides.map(s => s.id), 0) + 1;
-      return { ...slideData, id: newId };
+      if (mockAPI) {
+        // Mock response for now
+        const newId = Math.max(...slides.map(s => s.id), 0) + 1;
+        return { ...slideData, id: newId };
+      } else {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('title', slideData.title);
+        formData.append('subtitle', slideData.subtitle);
+        formData.append('description', slideData.description);
+        // Send each bullet point as a separate form field
+        slideData.bulletPoints.forEach((point, index) => {
+          formData.append(`bulletPoints[${index}]`, point);
+        });
+
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
+
+        const response = await axios.post(`${apiURL}/hero-slider/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data.data;
+      }
     } catch (error) {
-      if(isDevelopment){
-        console.error('Error adding slide:', error);
+      if (isDevelopment) {
+        console.log('Error adding slide:', error);
       }
     } finally {
       setLoading(false);
@@ -100,22 +123,44 @@ const HeroSliderTab: React.FC = () => {
   };
 
   // Update existing slide in API
-  const updateSlideInAPI = async (slideId: number, slideData: SlideData) => {
+  const updateSlideInAPI = async (slideId: number, slideData: SlideData, imageFile?: File) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.put(`${apiURL}/hero-slider/${slideId}`, slideData);
-      // const result = response.data.success;
-      // if (result) {
+      if (mockAPI) {
         setSaveMessage('Slide updated successfully!');
         setTimeout(() => setSaveMessage(''), 3000);
-      // }
-    } catch (error) {
-      if(isDevelopment){
-        console.error('Error updating slide:', error);
+      } else {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('title', slideData.title);
+        formData.append('subtitle', slideData.subtitle);
+        formData.append('description', slideData.description);
+        // Send each bullet point as a separate form field
+        slideData.bulletPoints.forEach((point, index) => {
+          formData.append(`bulletPoints[${index}]`, point);
+        });
+
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
+
+        const response = await axios.put(`${apiURL}/hero-slider/${slideId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        const result = response.data.success;
+        if (result) {
+          setSaveMessage('Slide updated successfully!');
+          setTimeout(() => setSaveMessage(''), 3000);
+        }
       }
-        setSaveMessage('Error updating slide. Please try again.');
-        setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      if (isDevelopment) {
+        console.log('Error updating slide:', error);
+      }
+      setSaveMessage('Error updating slide. Please try again.');
+      setTimeout(() => setSaveMessage(''), 3000);
     } finally {
       setLoading(false);
     }
@@ -125,16 +170,21 @@ const HeroSliderTab: React.FC = () => {
   const deleteSlideFromAPI = async (slideId: number) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.delete(`${apiURL}/hero-slider/${slideId}`);
-      // const result = response.data.success;
-      // if (result) {
+      if (mockAPI) {
         setSaveMessage('Slide deleted successfully!');
         setTimeout(() => setSaveMessage(''), 3000);
-      // }
+      } else {
+        // TODO: Replace with actual API call
+        const response = await axios.delete(`${apiURL}/hero-slider/${slideId}`);
+        const result = response.data.success;
+        if (result) {
+          setSaveMessage('Slide deleted successfully!');
+          setTimeout(() => setSaveMessage(''), 3000);
+        }
+      }
     } catch (error) {
-      if(isDevelopment){
-        console.error('Error deleting slide:', error);
+      if (isDevelopment) {
+        console.log('Error deleting slide:', error);
       }
       setSaveMessage('Error deleting slide. Please try again.');
       setTimeout(() => setSaveMessage(''), 3000);
@@ -168,8 +218,9 @@ const HeroSliderTab: React.FC = () => {
 
   const addNewSlide = async () => {
     try {
-      const addedSlide = await addSlideToAPI(newSlide);
-      if(addedSlide){
+      console.log('Adding new slide with image file:', newSlideImageFile);
+      const addedSlide = await addSlideToAPI(newSlide, newSlideImageFile || undefined);
+      if (addedSlide) {
         setSlides(prev => [...prev, addedSlide]);
       }
       setNewSlide({
@@ -179,6 +230,7 @@ const HeroSliderTab: React.FC = () => {
         image: '',
         bulletPoints: ['', '', '', ''],
       });
+      setNewSlideImageFile(null);
       setShowAddModal(false);
       setSaveMessage('New slide added successfully!');
       setTimeout(() => setSaveMessage(''), 3000);
@@ -199,6 +251,7 @@ const HeroSliderTab: React.FC = () => {
       setShowDeleteConfirm(null);
     } catch (error) {
       // Error message is handled in deleteSlideFromAPI
+      setShowDeleteConfirm(null);
     }
   };
 
@@ -210,11 +263,19 @@ const HeroSliderTab: React.FC = () => {
     try {
       const slideToUpdate = slides.find(slide => slide.id === slideId);
       if (slideToUpdate) {
-        await updateSlideInAPI(slideId, slideToUpdate);
+        const imageFile = editingImageFiles[slideId];
+        await updateSlideInAPI(slideId, slideToUpdate, imageFile);
         setIsEditing(null);
+        // Clear the image file after successful update
+        setEditingImageFiles(prev => {
+          const newFiles = { ...prev };
+          delete newFiles[slideId];
+          return newFiles;
+        });
       }
     } catch (error) {
       // Error message is handled in updateSlideInAPI
+      setIsEditing(null);
     }
   };
 
@@ -338,6 +399,16 @@ const HeroSliderTab: React.FC = () => {
                         onChange={e => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            console.log(
+                              'Editing slide image file selected for slide',
+                              slide.id,
+                              ':',
+                              file.name,
+                              file.size,
+                              file.type
+                            );
+                            setEditingImageFiles(prev => ({ ...prev, [slide.id]: file }));
+                            // Create preview URL for display
                             const reader = new FileReader();
                             reader.onload = event => {
                               handleSlideChange(slide.id, 'image', event.target?.result as string);
@@ -463,6 +534,14 @@ const HeroSliderTab: React.FC = () => {
                   onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) {
+                      console.log(
+                        'New slide image file selected:',
+                        file.name,
+                        file.size,
+                        file.type
+                      );
+                      setNewSlideImageFile(file);
+                      // Create preview URL for display
                       const reader = new FileReader();
                       reader.onload = event => {
                         setNewSlide(prev => ({ ...prev, image: event.target?.result as string }));

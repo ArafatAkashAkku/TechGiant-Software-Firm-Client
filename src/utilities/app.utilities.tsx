@@ -7,3 +7,6 @@ export const isProduction = appType === 'production';
 export const isDevelopment = appType === 'development';
 
 export const apiURL = import.meta.env.VITE_API_URL;
+
+// export const mockAPI = import.meta.env.VITE_MOCK_API;
+export const mockAPI = false;
