@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {isDevelopment } from '../utilities/app.utilities';
-// import { apiURL } from '../utilities/app.utilities';
-// import axios from 'axios';
+import { isDevelopment, apiURL, mockAPI } from '../utilities/app.utilities';
+import axios from 'axios';
 
 // Types for client data
 interface Statistic {
@@ -170,21 +169,24 @@ const Client: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Replace these URLs with your actual API endpoints
-        // const clientsResponse = await axios.get(`${apiURL}/clients/clients`);
-        // const testimonialsResponse = await axios.get(`${apiURL}/clients/testimonials`);
-        // const statisticsResponse = await axios.get(`${apiURL}/clients/statistics`);
-        // setClients(clientsResponse.data.data);
-        // setFeaturedTestimonials(testimonialsResponse.data.data);
-        // setStatistics(statisticsResponse.data.data);
 
-        // For now, using default data
-        setClients(defaultClients);
-        setFeaturedTestimonials(defaultFeaturedTestimonials);
-        setStatistics(defaultStatistics);
+        if (mockAPI) {
+          // For now, using default data
+          setClients(defaultClients);
+          setFeaturedTestimonials(defaultFeaturedTestimonials);
+          setStatistics(defaultStatistics);
+        } else {
+          // Replace these URLs with your actual API endpoints
+          const clientsResponse = await axios.get(`${apiURL}/clients/clients`);
+          const testimonialsResponse = await axios.get(`${apiURL}/clients/testimonials`);
+          const statisticsResponse = await axios.get(`${apiURL}/clients/statistics`);
+          setClients(clientsResponse.data.data);
+          setFeaturedTestimonials(testimonialsResponse.data.data);
+          setStatistics(statisticsResponse.data.data);
+        }
       } catch (error) {
-        if(isDevelopment){
-        console.error('Error fetching client data:', error);
+        if (isDevelopment) {
+          console.log('Error fetching client data:', error);
         }
         // Fallback to default data on error
         setClients(defaultClients);

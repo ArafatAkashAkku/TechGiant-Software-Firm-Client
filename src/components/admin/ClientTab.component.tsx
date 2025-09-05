@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { isDevelopment } from '../../utilities/app.utilities';
-// import axios from 'axios';
+import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
+import axios from 'axios';
 
 interface Statistic {
   id: number;
@@ -125,15 +125,31 @@ const ClientTab: React.FC = () => {
   const fetchClientData = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.get(`${apiURL}/clients/clients`);
-      // setClientData(response.data.data);
 
-      // For now, using mock data
-      setClientData(mockClientData);
+      if (mockAPI) {
+        // For now, using mock data
+        setClientData(mockClientData);
+      } else {
+        // Fetch data from separate endpoints
+        const [clientsResponse, statisticsResponse, testimonialsResponse] = await Promise.all([
+          axios.get(`${apiURL}/clients/clients`),
+          axios.get(`${apiURL}/clients/statistics`),
+          axios.get(`${apiURL}/clients/testimonials`),
+        ]);
+
+        setClientData({
+          clients: Array.isArray(clientsResponse.data?.data) ? clientsResponse.data.data : [],
+          statistics: Array.isArray(statisticsResponse.data?.data)
+            ? statisticsResponse.data.data
+            : [],
+          featuredTestimonials: Array.isArray(testimonialsResponse.data?.data)
+            ? testimonialsResponse.data.data
+            : [],
+        });
+      }
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error fetching client data:', error);
+      if (isDevelopment) {
+        console.log('Error fetching client data:', error);
       }
       setClientData(mockClientData);
     } finally {
@@ -145,13 +161,16 @@ const ClientTab: React.FC = () => {
   const saveClientData = async (updatedData: ClientData) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // await axios.put(`${apiURL}/clients/clients`, updatedData);
 
-      console.log('Client data saved:', updatedData);
-      setClientData(updatedData);
+      if (mockAPI) {
+        setClientData(updatedData);
+      } else {
+        // For non-mock API, just update local state
+        // Individual operations will handle their own API calls
+        setClientData(updatedData);
+      }
     } catch (error) {
-      console.error('Error saving client data:', error);
+      console.log('Error saving client data:', error);
     } finally {
       setLoading(false);
     }
@@ -168,11 +187,25 @@ const ClientTab: React.FC = () => {
 
   const handleSaveClient = async () => {
     if (editingClient) {
-      const updatedClients = clientData.clients.map(c =>
-        c.id === editingClient.id ? editingClient : c
-      );
-      await saveClientData({ ...clientData, clients: updatedClients });
-      setEditingClient(null);
+      try {
+        if (!mockAPI) {
+          // Make API call to update client
+          await axios.put(`${apiURL}/clients/clients/${editingClient.id}`, {
+            name: editingClient.name,
+            logo: editingClient.logo,
+            website: editingClient.website,
+            industry: editingClient.industry,
+          });
+        }
+
+        const updatedClients = (clientData.clients || []).map(c =>
+          c.id === editingClient.id ? editingClient : c
+        );
+        await saveClientData({ ...clientData, clients: updatedClients });
+        setEditingClient(null);
+      } catch (error) {
+        console.error('Error updating client:', error);
+      }
     }
   };
 
@@ -180,18 +213,45 @@ const ClientTab: React.FC = () => {
     setShowDeleteConfirm({ type: 'client', id });
   };
   const handleDeleteClient = async (id: number) => {
-    const updatedClients = clientData.clients.filter(c => c.id !== id);
-    await saveClientData({ ...clientData, clients: updatedClients });
-    setShowDeleteConfirm(null);
+    try {
+      if (!mockAPI) {
+        // Make API call to delete client
+        await axios.delete(`${apiURL}/clients/clients/${id}`);
+      }
+
+      const updatedClients = (clientData.clients || []).filter(c => c.id !== id);
+      await saveClientData({ ...clientData, clients: updatedClients });
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting client:', error);
+    }
   };
 
   const handleAddClient = async () => {
-    const newId = Math.max(...clientData.clients.map(c => c.id), 0) + 1;
-    const clientToAdd: Client = { ...newClient, id: newId };
-    const updatedClients = [...clientData.clients, clientToAdd];
-    await saveClientData({ ...clientData, clients: updatedClients });
-    setNewClient({ name: '', logo: '', website: '', industry: '' });
-    setShowAddModal(false);
+    try {
+      let clientToAdd: Client;
+
+      if (!mockAPI) {
+        // Make API call to create client
+        const response = await axios.post(`${apiURL}/clients/clients`, {
+          name: newClient.name,
+          logo: newClient.logo,
+          website: newClient.website,
+          industry: newClient.industry,
+        });
+        clientToAdd = response.data.data;
+      } else {
+        const newId = Math.max(...(clientData.clients || []).map(c => c.id), 0) + 1;
+        clientToAdd = { ...newClient, id: newId };
+      }
+
+      const updatedClients = [...(clientData.clients || []), clientToAdd];
+      await saveClientData({ ...clientData, clients: updatedClients });
+      setNewClient({ name: '', logo: '', website: '', industry: '' });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding client:', error);
+    }
   };
 
   // Statistics management functions
@@ -201,11 +261,25 @@ const ClientTab: React.FC = () => {
 
   const handleSaveStatistic = async () => {
     if (editingStatistic) {
-      const updatedStatistics = clientData.statistics.map(s =>
-        s.id === editingStatistic.id ? editingStatistic : s
-      );
-      await saveClientData({ ...clientData, statistics: updatedStatistics });
-      setEditingStatistic(null);
+      try {
+        if (!mockAPI) {
+          // Make API call to update statistic
+          await axios.put(`${apiURL}/clients/statistics/${editingStatistic.id}`, {
+            value: editingStatistic.value,
+            label: editingStatistic.label,
+            icon: editingStatistic.icon,
+            suffix: editingStatistic.suffix,
+          });
+        }
+
+        const updatedStatistics = (clientData.statistics || []).map(s =>
+          s.id === editingStatistic.id ? editingStatistic : s
+        );
+        await saveClientData({ ...clientData, statistics: updatedStatistics });
+        setEditingStatistic(null);
+      } catch (error) {
+        console.error('Error updating statistic:', error);
+      }
     }
   };
 
@@ -213,18 +287,45 @@ const ClientTab: React.FC = () => {
     setShowDeleteConfirm({ type: 'statistic', id });
   };
   const handleDeleteStatistic = async (id: number) => {
-    const updatedStatistics = clientData.statistics.filter(s => s.id !== id);
-    await saveClientData({ ...clientData, statistics: updatedStatistics });
-    setShowDeleteConfirm(null);
+    try {
+      if (!mockAPI) {
+        // Make API call to delete statistic
+        await axios.delete(`${apiURL}/clients/statistics/${id}`);
+      }
+
+      const updatedStatistics = (clientData.statistics || []).filter(s => s.id !== id);
+      await saveClientData({ ...clientData, statistics: updatedStatistics });
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting statistic:', error);
+    }
   };
 
   const handleAddStatistic = async () => {
-    const newId = Math.max(...clientData.statistics.map(s => s.id), 0) + 1;
-    const statisticToAdd: Statistic = { ...newStatistic, id: newId };
-    const updatedStatistics = [...clientData.statistics, statisticToAdd];
-    await saveClientData({ ...clientData, statistics: updatedStatistics });
-    setNewStatistic({ value: 0, label: '', icon: '', suffix: '' });
-    setShowAddModal(false);
+    try {
+      let statisticToAdd: Statistic;
+
+      if (!mockAPI) {
+        // Make API call to create statistic
+        const response = await axios.post(`${apiURL}/clients/statistics`, {
+          value: newStatistic.value,
+          label: newStatistic.label,
+          icon: newStatistic.icon,
+          suffix: newStatistic.suffix,
+        });
+        statisticToAdd = response.data.data;
+      } else {
+        const newId = Math.max(...(clientData.statistics || []).map(s => s.id), 0) + 1;
+        statisticToAdd = { ...newStatistic, id: newId };
+      }
+
+      const updatedStatistics = [...(clientData.statistics || []), statisticToAdd];
+      await saveClientData({ ...clientData, statistics: updatedStatistics });
+      setNewStatistic({ value: 0, label: '', icon: '', suffix: '' });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding statistic:', error);
+    }
   };
 
   // Testimonial management functions
@@ -234,11 +335,27 @@ const ClientTab: React.FC = () => {
 
   const handleSaveTestimonial = async () => {
     if (editingTestimonial) {
-      const updatedTestimonials = clientData.featuredTestimonials.map(t =>
-        t.id === editingTestimonial.id ? editingTestimonial : t
-      );
-      await saveClientData({ ...clientData, featuredTestimonials: updatedTestimonials });
-      setEditingTestimonial(null);
+      try {
+        if (!mockAPI) {
+          // Make API call to update testimonial
+          await axios.put(`${apiURL}/clients/testimonials/${editingTestimonial.id}`, {
+            clientName: editingTestimonial.clientName,
+            clientLogo: editingTestimonial.clientLogo,
+            testimonial: editingTestimonial.testimonial,
+            clientTitle: editingTestimonial.clientTitle,
+            clientCompany: editingTestimonial.clientCompany,
+            rating: editingTestimonial.rating,
+          });
+        }
+
+        const updatedTestimonials = (clientData.featuredTestimonials || []).map(t =>
+          t.id === editingTestimonial.id ? editingTestimonial : t
+        );
+        await saveClientData({ ...clientData, featuredTestimonials: updatedTestimonials });
+        setEditingTestimonial(null);
+      } catch (error) {
+        console.error('Error updating testimonial:', error);
+      }
     }
   };
 
@@ -246,28 +363,57 @@ const ClientTab: React.FC = () => {
     setShowDeleteConfirm({ type: 'testimonial', id });
   };
   const handleDeleteTestimonial = async (id: number) => {
-    const updatedTestimonials = clientData.featuredTestimonials.filter(t => t.id !== id);
-    await saveClientData({ ...clientData, featuredTestimonials: updatedTestimonials });
-    setShowDeleteConfirm(null);
+    try {
+      if (!mockAPI) {
+        // Make API call to delete testimonial
+        await axios.delete(`${apiURL}/clients/testimonials/${id}`);
+      }
+
+      const updatedTestimonials = (clientData.featuredTestimonials || []).filter(t => t.id !== id);
+      await saveClientData({ ...clientData, featuredTestimonials: updatedTestimonials });
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting testimonial:', error);
+    }
   };
   const cancelDelete = () => {
     setShowDeleteConfirm(null);
   };
 
   const handleAddTestimonial = async () => {
-    const newId = Math.max(...clientData.featuredTestimonials.map(t => t.id), 0) + 1;
-    const testimonialToAdd: ClientTestimonial = { ...newTestimonial, id: newId };
-    const updatedTestimonials = [...clientData.featuredTestimonials, testimonialToAdd];
-    await saveClientData({ ...clientData, featuredTestimonials: updatedTestimonials });
-    setNewTestimonial({
-      clientName: '',
-      clientLogo: '',
-      testimonial: '',
-      clientTitle: '',
-      clientCompany: '',
-      rating: 5,
-    });
-    setShowAddModal(false);
+    try {
+      let testimonialToAdd: ClientTestimonial;
+
+      if (!mockAPI) {
+        // Make API call to create testimonial
+        const response = await axios.post(`${apiURL}/clients/testimonials`, {
+          clientName: newTestimonial.clientName,
+          clientLogo: newTestimonial.clientLogo,
+          testimonial: newTestimonial.testimonial,
+          clientTitle: newTestimonial.clientTitle,
+          clientCompany: newTestimonial.clientCompany,
+          rating: newTestimonial.rating,
+        });
+        testimonialToAdd = response.data.data;
+      } else {
+        const newId = Math.max(...(clientData.featuredTestimonials || []).map(t => t.id), 0) + 1;
+        testimonialToAdd = { ...newTestimonial, id: newId };
+      }
+
+      const updatedTestimonials = [...(clientData.featuredTestimonials || []), testimonialToAdd];
+      await saveClientData({ ...clientData, featuredTestimonials: updatedTestimonials });
+      setNewTestimonial({
+        clientName: '',
+        clientLogo: '',
+        testimonial: '',
+        clientTitle: '',
+        clientCompany: '',
+        rating: 5,
+      });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding testimonial:', error);
+    }
   };
 
   const renderStars = (rating: number, onChange?: (rating: number) => void) => {
@@ -304,7 +450,7 @@ const ClientTab: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {clientData.clients.map(client => (
+        {(clientData.clients || []).map(client => (
           <div key={client.id} className="border dark:border-gray-700 rounded-lg p-4">
             {editingClient && editingClient.id === client.id ? (
               <div className="space-y-4">
@@ -426,7 +572,7 @@ const ClientTab: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {clientData.statistics.map(statistic => (
+        {(clientData.statistics || []).map(statistic => (
           <div key={statistic.id} className="border dark:border-gray-700 rounded-lg p-4">
             {editingStatistic && editingStatistic.id === statistic.id ? (
               <div className="space-y-4">
@@ -556,7 +702,7 @@ const ClientTab: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {clientData.featuredTestimonials.map(testimonial => (
+        {(clientData.featuredTestimonials || []).map(testimonial => (
           <div key={testimonial.id} className="border dark:border-gray-700 rounded-lg p-4">
             {editingTestimonial && editingTestimonial.id === testimonial.id ? (
               <div className="space-y-4">
