@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { isDevelopment } from '../../utilities/app.utilities';
-// import { apiURL } from '../../utilities/app.utilities';
-// import axios from 'axios';
+import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
+import axios from 'axios';
 
 interface Testimonial {
   id: number;
@@ -56,15 +55,19 @@ const TestimonialsTab: React.FC = () => {
   const fetchTestimonialsData = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.get(`${apiURL}/testimonials`);
-      // setTestimonials(response.data.data);
 
-      // For now, using mock data
-      setTestimonials(mockTestimonials);
+      if (mockAPI) {
+        // For now, using mock data
+        setTestimonials(mockTestimonials);
+      } else {
+        // TODO: Replace with actual API call
+        const response = await axios.get(`${apiURL}/testimonials`);
+        const testimonialsData = response.data?.data;
+        setTestimonials(Array.isArray(testimonialsData) ? testimonialsData : []);
+      }
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error fetching testimonials:', error);
+      if (isDevelopment) {
+        console.log('Error fetching testimonials:', error);
       }
       setTestimonials(mockTestimonials);
     } finally {
@@ -76,16 +79,17 @@ const TestimonialsTab: React.FC = () => {
   const addTestimonialToAPI = async (testimonial: Testimonial) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.post(`${apiURL}/testimonials`, testimonial);
-      // return response.data.data;
-      if(isDevelopment){
-      console.log('Testimonial added:', testimonial);
+
+      if (mockAPI) {
+        return testimonial;
+      } else {
+        // TODO: Replace with actual API call
+        const response = await axios.post(`${apiURL}/testimonials`, testimonial);
+        return response.data.data;
       }
-      return testimonial;
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error adding testimonial:', error);
+      if (isDevelopment) {
+        console.log('Error adding testimonial:', error);
       }
     } finally {
       setLoading(false);
@@ -96,16 +100,17 @@ const TestimonialsTab: React.FC = () => {
   const updateTestimonialInAPI = async (testimonial: Testimonial) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await axios.put(`${apiURL}/testimonials/${testimonial.id}`, testimonial);
-      // return response.data.data;
-      if(isDevelopment){
-      console.log('Testimonial updated:', testimonial);
+
+      if (mockAPI) {
+        return testimonial;
+      } else {
+        // TODO: Replace with actual API call
+        const response = await axios.put(`${apiURL}/testimonials/${testimonial.id}`, testimonial);
+        return response.data.data;
       }
-      return testimonial;
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error updating testimonial:', error);
+      if (isDevelopment) {
+        console.log('Error updating testimonial:', error);
       }
     } finally {
       setLoading(false);
@@ -116,14 +121,14 @@ const TestimonialsTab: React.FC = () => {
   const deleteTestimonialFromAPI = async (id: number) => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // await axios.delete(`${apiURL}/testimonials/${id}`);
-      if(isDevelopment){
-      console.log('Testimonial deleted:', id);
+
+      if (!mockAPI) {
+        // TODO: Replace with actual API call
+        await axios.delete(`${apiURL}/testimonials/${id}`);
       }
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error deleting testimonial:', error);
+      if (isDevelopment) {
+        console.log('Error deleting testimonial:', error);
       }
     } finally {
       setLoading(false);
@@ -142,15 +147,15 @@ const TestimonialsTab: React.FC = () => {
     if (editingTestimonial) {
       try {
         await updateTestimonialInAPI(editingTestimonial);
-        const updatedTestimonials = testimonials.map(t =>
+        const updatedTestimonials = (testimonials || []).map(t =>
           t.id === editingTestimonial.id ? editingTestimonial : t
         );
         setTestimonials(updatedTestimonials);
         setEditingTestimonial(null);
       } catch (error) {
-      if(isDevelopment){
-        console.error('Failed to update testimonial:', error);
-      }
+        if (isDevelopment) {
+          console.log('Failed to update testimonial:', error);
+        }
       }
     }
   };
@@ -162,12 +167,12 @@ const TestimonialsTab: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await deleteTestimonialFromAPI(id);
-      const updatedTestimonials = testimonials.filter(t => t.id !== id);
+      const updatedTestimonials = (testimonials || []).filter(t => t.id !== id);
       setTestimonials(updatedTestimonials);
       setShowDeleteConfirm(null);
     } catch (error) {
-      if(isDevelopment){
-      console.error('Failed to delete testimonial:', error);
+      if (isDevelopment) {
+        console.log('Failed to delete testimonial:', error);
       }
     }
   };
@@ -177,7 +182,7 @@ const TestimonialsTab: React.FC = () => {
   };
 
   const handleAddNew = async () => {
-    const newId = Math.max(...testimonials.map(t => t.id), 0) + 1;
+    const newId = Math.max(...(testimonials || []).map(t => t.id), 0) + 1;
     const testimonialToAdd: Testimonial = {
       ...newTestimonial,
       id: newId,
@@ -185,7 +190,7 @@ const TestimonialsTab: React.FC = () => {
 
     try {
       await addTestimonialToAPI(testimonialToAdd);
-      const updatedTestimonials = [...testimonials, testimonialToAdd];
+      const updatedTestimonials = [...(testimonials || []), testimonialToAdd];
       setTestimonials(updatedTestimonials);
 
       setNewTestimonial({
@@ -198,8 +203,8 @@ const TestimonialsTab: React.FC = () => {
       });
       setShowAddModal(false);
     } catch (error) {
-      if(isDevelopment){
-      console.error('Failed to add testimonial:', error);
+      if (isDevelopment) {
+        console.log('Failed to add testimonial:', error);
       }
     }
   };
@@ -243,7 +248,7 @@ const TestimonialsTab: React.FC = () => {
       )}
 
       <div className="grid gap-6">
-        {testimonials.map(testimonial => (
+        {(testimonials || []).map(testimonial => (
           <div key={testimonial.id} className="border dark:border-gray-700 rounded-lg p-6">
             {editingTestimonial && editingTestimonial.id === testimonial.id ? (
               <div className="space-y-4">
