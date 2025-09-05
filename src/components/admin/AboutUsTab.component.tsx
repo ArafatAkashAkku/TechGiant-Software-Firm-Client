@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { isDevelopment } from '../../utilities/app.utilities';
-// import { apiURL } from '../../utilities/app.utilities';
-// import axios from 'axios';
+import { isDevelopment, apiURL, mockAPI } from '../../utilities/app.utilities';
+import axios from 'axios';
 
 interface Statistic {
   id: number;
@@ -87,25 +86,28 @@ const AboutUsTab: React.FC = () => {
   const fetchAboutUsData = async () => {
     try {
       setAboutUsLoading(true);
-      // TODO: Replace with actual API calls
-      // const [statsRes, storyRes, missionRes, companyRes] = await Promise.all([
-        // axios.get(`${apiURL}/about-us/statistics`),
-      //   axios.get(`${apiURL}/about-us/story`),
-      //   axios.get(`${apiURL}/about-us/mission`),
-      //   axios.get(`${apiURL}/about-us/company`)
-      // ]);
-      // setAboutUsData({
-      //   statistics: statsRes.data,
-      //   storyContent: storyRes.data,
-      //   missionContent: missionRes.data,
-      //   companyInfo: companyRes.data
-      // });
 
-      // For now, using mock data
-      setAboutUsData(mockAboutUsData);
+      if (mockAPI) {
+        // For now, using mock data
+        setAboutUsData(mockAboutUsData);
+      } else {
+        // TODO: Replace with actual API calls
+        const [statsRes, storyRes, missionRes, companyRes] = await Promise.all([
+          axios.get(`${apiURL}/about-us/statistics`),
+          axios.get(`${apiURL}/about-us/story`),
+          axios.get(`${apiURL}/about-us/mission`),
+          axios.get(`${apiURL}/about-us/company`),
+        ]);
+        setAboutUsData({
+          statistics: statsRes.data.data,
+          storyContent: storyRes.data.data,
+          missionContent: missionRes.data.data,
+          companyInfo: companyRes.data.data,
+        });
+      }
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error fetching About Us data:', error);
+      if (isDevelopment) {
+        console.log('Error fetching About Us data:', error);
       }
       // Fallback to mock data on error
       setAboutUsData(mockAboutUsData);
@@ -127,12 +129,25 @@ const AboutUsTab: React.FC = () => {
       //   axios.put(`${apiURL}/about-us/company`, aboutUsData.companyInfo)
       // ]);
 
-      setAboutUsSaveMessage('About Us content saved successfully!');
+      if (mockAPI) {
+        setAboutUsSaveMessage('About Us content saved successfully!');
 
-      setTimeout(() => setAboutUsSaveMessage(''), 3000);
+        setTimeout(() => setAboutUsSaveMessage(''), 3000);
+      } else {
+        // TODO: Replace with actual API calls
+        await Promise.all([
+          axios.put(`${apiURL}/about-us/statistics`, { statistics: aboutUsData.statistics }),
+          axios.put(`${apiURL}/about-us/story`, aboutUsData.storyContent),
+          axios.put(`${apiURL}/about-us/mission`, aboutUsData.missionContent),
+          axios.put(`${apiURL}/about-us/company`, aboutUsData.companyInfo),
+        ]);
+        setAboutUsSaveMessage('About Us content saved successfully!');
+
+        setTimeout(() => setAboutUsSaveMessage(''), 3000);
+      }
     } catch (error) {
-      if(isDevelopment){
-      console.error('Error saving About Us data:', error);
+      if (isDevelopment) {
+        console.log('Error saving About Us data:', error);
       }
       setAboutUsSaveMessage('Error saving About Us content. Please try again.');
     } finally {
@@ -177,6 +192,51 @@ const AboutUsTab: React.FC = () => {
     });
   };
 
+  // Add new statistic
+  const addStatistic = () => {
+    const newStatistic: Statistic = {
+      id: Date.now(), // Temporary ID for new statistics
+      value: 0,
+      label: '',
+      icon: '',
+      suffix: '',
+    };
+    setAboutUsData({
+      ...aboutUsData,
+      statistics: [...aboutUsData.statistics, newStatistic],
+    });
+  };
+
+  // Remove statistic
+  const removeStatistic = (index: number) => {
+    if (aboutUsData.statistics.length <= 1) {
+      return; // Don't allow removing the last statistic
+    }
+    const updatedStats = aboutUsData.statistics.filter((_, i) => i !== index);
+    setAboutUsData({
+      ...aboutUsData,
+      statistics: updatedStats,
+    });
+  };
+
+  // Add new paragraph to story
+  const addStoryParagraph = () => {
+    const updatedParagraphs = [...aboutUsData.storyContent.paragraphs, ''];
+    setAboutUsData({
+      ...aboutUsData,
+      storyContent: { ...aboutUsData.storyContent, paragraphs: updatedParagraphs },
+    });
+  };
+
+  // Remove paragraph from story
+  const removeStoryParagraph = (index: number) => {
+    const updatedParagraphs = aboutUsData.storyContent.paragraphs.filter((_, i) => i !== index);
+    setAboutUsData({
+      ...aboutUsData,
+      storyContent: { ...aboutUsData.storyContent, paragraphs: updatedParagraphs },
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Company Information */}
@@ -218,10 +278,28 @@ const AboutUsTab: React.FC = () => {
       {/* Statistics */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Statistics</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Company achievement statistics
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Statistics</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Company achievement statistics
+              </p>
+            </div>
+            <button
+              onClick={addStatistic}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+            >
+              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              Add Statistic
+            </button>
+          </div>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -230,9 +308,34 @@ const AboutUsTab: React.FC = () => {
                 key={stat.id}
                 className="border border-gray-200 dark:border-gray-600 rounded-lg p-4"
               >
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                  Statistic {index + 1}
-                </h4>
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                    Statistic {index + 1}
+                  </h4>
+                  <button
+                    onClick={() => removeStatistic(index)}
+                    disabled={aboutUsData.statistics.length <= 1}
+                    className={`inline-flex items-center p-1 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 ${
+                      aboutUsData.statistics.length <= 1
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20'
+                    }`}
+                    title={
+                      aboutUsData.statistics.length <= 1
+                        ? 'Cannot remove the last statistic'
+                        : 'Remove Statistic'
+                    }
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -292,10 +395,28 @@ const AboutUsTab: React.FC = () => {
       {/* Our Story */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Our Story</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Company history and story content
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Our Story</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Company history and story content
+              </p>
+            </div>
+            <button
+              onClick={addStoryParagraph}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+            >
+              <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              Add Paragraph
+            </button>
+          </div>
         </div>
         <div className="p-6">
           <div className="space-y-6">
@@ -314,9 +435,32 @@ const AboutUsTab: React.FC = () => {
 
             {aboutUsData.storyContent.paragraphs.map((paragraph, index) => (
               <div key={index}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Paragraph {index + 1}
-                </label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Paragraph {index + 1}
+                  </label>
+                  {aboutUsData.storyContent.paragraphs.length > 1 && (
+                    <button
+                      onClick={() => removeStoryParagraph(index)}
+                      className="inline-flex items-center p-1 border border-transparent text-sm font-medium rounded-md text-red-600 hover:text-red-800 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                      title="Remove Paragraph"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 <textarea
                   value={paragraph}
                   onChange={e => handleStoryParagraphChange(index, e.target.value)}
