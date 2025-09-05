@@ -241,12 +241,13 @@ const ClientTab: React.FC = () => {
 
   const handleAddClient = async () => {
     try {
-      let clientToAdd: Client;
-
       if (mockAPI) {
         const newId = Math.max(...(clientData.clients || []).map(c => c.id), 0) + 1;
-        clientToAdd = { ...newClient, id: newId };
-        // Make API call to create client
+        const clientToAdd: Client = { ...newClient, id: newId };
+        const updatedClients = [...(clientData.clients || []), clientToAdd];
+        await saveClientData({ ...clientData, clients: updatedClients });
+        setNewClient({ name: '', logo: '', website: '', industry: '' });
+        setShowAddModal(false);
       } else {
         const response = await axios.post(`${apiURL}/clients/clients`, {
           name: newClient.name,
@@ -258,12 +259,9 @@ const ClientTab: React.FC = () => {
           showSuccessToast('Client added successfully');
         }
         fetchClientData();
+        setNewClient({ name: '', logo: '', website: '', industry: '' });
+        setShowAddModal(false);
       }
-
-      const updatedClients = [...(clientData.clients || []), clientToAdd];
-      await saveClientData({ ...clientData, clients: updatedClients });
-      setNewClient({ name: '', logo: '', website: '', industry: '' });
-      setShowAddModal(false);
     } catch (error) {
       console.error('Error adding client:', error);
     }
@@ -328,12 +326,13 @@ const ClientTab: React.FC = () => {
 
   const handleAddStatistic = async () => {
     try {
-      let statisticToAdd: Statistic;
-
       if (mockAPI) {
         const newId = Math.max(...(clientData.statistics || []).map(s => s.id), 0) + 1;
-        statisticToAdd = { ...newStatistic, id: newId };
-        // Make API call to create statistic
+        const statisticToAdd: Statistic = { ...newStatistic, id: newId };
+        const updatedStatistics = [...(clientData.statistics || []), statisticToAdd];
+        await saveClientData({ ...clientData, statistics: updatedStatistics });
+        setNewStatistic({ value: 0, label: '', icon: '', suffix: '' });
+        setShowAddModal(false);
       } else {
         const response = await axios.post(`${apiURL}/clients/statistics`, {
           value: newStatistic.value,
@@ -345,12 +344,9 @@ const ClientTab: React.FC = () => {
           showSuccessToast('Statistic added successfully');
         }
         fetchClientData();
+        setNewStatistic({ value: 0, label: '', icon: '', suffix: '' });
+        setShowAddModal(false);
       }
-
-      const updatedStatistics = [...(clientData.statistics || []), statisticToAdd];
-      await saveClientData({ ...clientData, statistics: updatedStatistics });
-      setNewStatistic({ value: 0, label: '', icon: '', suffix: '' });
-      setShowAddModal(false);
     } catch (error) {
       if (isDevelopment) console.log('Error adding statistic:', error);
       showErrorToast('Error adding statistic');
@@ -375,6 +371,7 @@ const ClientTab: React.FC = () => {
             clientCompany: editingTestimonial.clientCompany,
             rating: editingTestimonial.rating,
           });
+          showSuccessToast('Testimonial updated successfully');
         }
 
         const updatedTestimonials = (clientData.featuredTestimonials || []).map(t =>
@@ -396,6 +393,7 @@ const ClientTab: React.FC = () => {
       if (!mockAPI) {
         // Make API call to delete testimonial
         await axios.delete(`${apiURL}/clients/testimonials/${id}`);
+        showSuccessToast('Testimonial deleted successfully');
       }
 
       const updatedTestimonials = (clientData.featuredTestimonials || []).filter(t => t.id !== id);
@@ -423,6 +421,7 @@ const ClientTab: React.FC = () => {
           clientCompany: newTestimonial.clientCompany,
           rating: newTestimonial.rating,
         });
+        showSuccessToast('Testimonial added successfully');
         testimonialToAdd = response.data.data;
       } else {
         const newId = Math.max(...(clientData.featuredTestimonials || []).map(t => t.id), 0) + 1;
@@ -479,7 +478,12 @@ const ClientTab: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {(clientData.clients || []).map(client => (
+        {clientData.clients.length === 0 && (
+          <div className="text-center py-4">
+            <div className="text-gray-600 dark:text-gray-400">No clients found.</div>
+          </div>
+        )}
+        {(clientData.clients || []).filter(Boolean).map(client => (
           <div key={client.id} className="border dark:border-gray-700 rounded-lg p-4">
             {editingClient && editingClient.id === client.id ? (
               <div className="space-y-4">
@@ -522,7 +526,7 @@ const ClientTab: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Logo (SVG Data URL)
+                    Logo (Data URL)
                   </label>
                   <textarea
                     value={editingClient.logo}
@@ -601,7 +605,12 @@ const ClientTab: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
-        {(clientData.statistics || []).map(statistic => (
+        {clientData.statistics.length === 0 && (
+          <div className="text-center py-4">
+            <div className="text-gray-600 dark:text-gray-400">No statistics found.</div>
+          </div>
+        )}
+        {(clientData.statistics || []).filter(Boolean).map(statistic => (
           <div key={statistic.id} className="border dark:border-gray-700 rounded-lg p-4">
             {editingStatistic && editingStatistic.id === statistic.id ? (
               <div className="space-y-4">
@@ -731,6 +740,11 @@ const ClientTab: React.FC = () => {
       </div>
 
       <div className="grid gap-4">
+        {clientData.featuredTestimonials.length === 0 && (
+          <div className="text-center py-4">
+            <div className="text-gray-600 dark:text-gray-400">No testimonials found.</div>
+          </div>
+        )}
         {(clientData.featuredTestimonials || []).map(testimonial => (
           <div key={testimonial.id} className="border dark:border-gray-700 rounded-lg p-4">
             {editingTestimonial && editingTestimonial.id === testimonial.id ? (
@@ -784,7 +798,7 @@ const ClientTab: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Client Logo (SVG Data URL)
+                    Client Logo (Data URL)
                   </label>
                   <textarea
                     value={editingTestimonial.clientLogo}
@@ -973,7 +987,7 @@ const ClientTab: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Logo (SVG Data URL)
+                    Logo (Data URL)
                   </label>
                   <textarea
                     value={newClient.logo}
@@ -1085,7 +1099,7 @@ const ClientTab: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Client Logo (SVG Data URL)
+                    Client Logo (Data URL)
                   </label>
                   <textarea
                     value={newTestimonial.clientLogo}

@@ -34,13 +34,13 @@ const AdminDashboard = () => {
     { id: 'heroslider', name: 'Hero Slider', icon: '🖼️' },
     { id: 'aboutus', name: 'About Us', icon: 'ℹ️' },
     { id: 'testimonials', name: 'Testimonials', icon: '💬' },
+    { id: 'client', name: 'Client', icon: '🏢' },
     { id: 'blog', name: 'Blog', icon: '📝' },
     { id: 'contactinfo', name: 'Contact Info', icon: '📞' },
     { id: 'contacts', name: 'Contacts', icon: '📧' },
     { id: 'career', name: 'Careers', icon: '💼' },
     { id: 'applicants', name: 'Applicants', icon: '👥' },
     { id: 'overview', name: 'Overview', icon: '📊' },
-    { id: 'client', name: 'Client', icon: '🏢' },
   ];
 
   const renderTabContent = () => {
