@@ -206,8 +206,10 @@ const AboutUsTab: React.FC = () => {
   };
 
   // Add new paragraph to story
+
   const addStoryParagraph = () => {
-    const updatedParagraphs = [...aboutUsData.storyContent.paragraphs, ''];
+    const paragraphs = aboutUsData.storyContent?.paragraphs ?? [];
+    const updatedParagraphs = [...paragraphs, ''];
     setAboutUsData({
       ...aboutUsData,
       storyContent: { ...aboutUsData.storyContent, paragraphs: updatedParagraphs },
@@ -215,8 +217,10 @@ const AboutUsTab: React.FC = () => {
   };
 
   // Remove paragraph from story
+
   const removeStoryParagraph = (index: number) => {
-    const updatedParagraphs = aboutUsData.storyContent.paragraphs.filter((_, i) => i !== index);
+    const paragraphs = aboutUsData.storyContent?.paragraphs ?? [];
+    const updatedParagraphs = paragraphs.filter((_, i) => i !== index);
     setAboutUsData({
       ...aboutUsData,
       storyContent: { ...aboutUsData.storyContent, paragraphs: updatedParagraphs },
@@ -300,7 +304,7 @@ const AboutUsTab: React.FC = () => {
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {aboutUsData.statistics.map((stat, index) => (
+            {aboutUsData.statistics?.map((stat, index) => (
               <div
                 key={stat.id}
                 className="border border-gray-200 dark:border-gray-600 rounded-lg p-4"
@@ -430,7 +434,7 @@ const AboutUsTab: React.FC = () => {
               />
             </div>
 
-            {aboutUsData.storyContent.paragraphs.map((paragraph, index) => (
+            {aboutUsData.storyContent?.paragraphs?.map((paragraph, index) => (
               <div key={index}>
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
